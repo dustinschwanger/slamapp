@@ -1,0 +1,454 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Church {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  address   String?
+  city      String?
+  state     String?
+  zip       String?
+  phone     String?
+  website   String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users                 User[]
+  communities           Community[]
+  groups                Group[]
+  playlists             Playlist[]
+  lessons               Lesson[]
+  prayerRequests        PrayerRequest[]
+  messages              Message[]
+  volunteerShifts       VolunteerShift[]
+  volunteerApplications VolunteerApplication[]
+  adminNotes            AdminNote[]
+  servicePlans          ServicePlan[]
+
+  @@map("churches")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  clerkId   String   @unique @map("clerk_id")
+  email     String   @unique
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  phone     String?
+  role      String   @default("member")
+  avatarUrl String?  @map("avatar_url")
+  churchId  String?  @map("church_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  church              Church?                @relation(fields: [churchId], references: [id])
+  ledGroups           Group[]                @relation("GroupLeader")
+  groupMemberships    GroupMember[]
+  createdPlaylists    Playlist[]
+  createdLessons      Lesson[]
+  prayerRequests      PrayerRequest[]
+  prayerMarkings      PrayerMarking[]
+  messages            Message[]
+  shiftSignups        ShiftSignup[]
+  createdShifts       VolunteerShift[]
+  reviewedApps        VolunteerApplication[] @relation("ReviewedBy")
+  adminNotes          AdminNote[]
+  createdServicePlans ServicePlan[]
+
+  @@index([churchId])
+  @@map("users")
+}
+
+model Community {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  address      String
+  city         String
+  state        String
+  zip          String
+  latitude     Decimal? @db.Decimal(10, 8)
+  longitude    Decimal? @db.Decimal(11, 8)
+  contactName  String?  @map("contact_name")
+  contactPhone String?  @map("contact_phone")
+  notes        String?
+  isActive     Boolean  @default(true) @map("is_active")
+  churchId     String   @map("church_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  church          Church           @relation(fields: [churchId], references: [id])
+  rooms           Room[]
+  groups          Group[]
+  volunteerShifts VolunteerShift[]
+  servicePlans    ServicePlan[]
+
+  @@index([churchId])
+  @@map("communities")
+}
+
+model Room {
+  id           String   @id @default(uuid()) @db.Uuid
+  communityId  String   @map("community_id") @db.Uuid
+  name         String
+  capacity     Int?
+  hasProjector Boolean  @default(false) @map("has_projector")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  community       Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  groups          Group[]
+  prayerRequests  PrayerRequest[]
+  volunteerShifts VolunteerShift[]
+  servicePlans    ServicePlan[]
+
+  @@map("rooms")
+}
+
+model Group {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  communityId String?  @map("community_id") @db.Uuid
+  roomId      String?  @map("room_id") @db.Uuid
+  meetingDay  String?  @map("meeting_day")
+  meetingTime String?  @map("meeting_time")
+  leaderId    String?  @map("leader_id") @db.Uuid
+  isActive    Boolean  @default(true) @map("is_active")
+  churchId    String   @map("church_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  church          Church           @relation(fields: [churchId], references: [id])
+  community       Community?       @relation(fields: [communityId], references: [id])
+  room            Room?            @relation(fields: [roomId], references: [id])
+  leader          User?            @relation("GroupLeader", fields: [leaderId], references: [id])
+  members         GroupMember[]
+  playlists       Playlist[]
+  prayerRequests  PrayerRequest[]
+  messages        Message[]
+  volunteerShifts VolunteerShift[]
+  servicePlans    ServicePlan[]
+
+  @@index([churchId])
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String   @id @default(uuid()) @db.Uuid
+  groupId  String   @map("group_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  role     String   @default("member")
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model Song {
+  id                 String   @id @default(uuid()) @db.Uuid
+  title              String
+  author             String?
+  composer           String?
+  yearWritten        Int?     @map("year_written")
+  hymnNumber         Int?     @map("hymn_number")
+  isPublicDomain     Boolean  @default(true) @map("is_public_domain")
+  licenseInfo        String?  @map("license_info")
+  audioUrl           String?  @map("audio_url")
+  audioDuration      Int?     @map("audio_duration")
+  sheetMusicUrl      String?  @map("sheet_music_url")
+  smallChurchMusicId Int?     @map("small_church_music_id")
+  tempo              String?
+  keySignature       String?  @map("key_signature")
+  tags               String[]
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  // Relations
+  lyrics        SongLyric[]
+  playlistSongs PlaylistSong[]
+
+  @@map("songs")
+}
+
+model SongLyric {
+  id            String @id @default(uuid()) @db.Uuid
+  songId        String @map("song_id") @db.Uuid
+  sectionType   String @map("section_type")
+  sectionNumber Int    @map("section_number")
+  lyrics        String
+  displayOrder  Int    @map("display_order")
+
+  // Relations
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@unique([songId, displayOrder])
+  @@map("song_lyrics")
+}
+
+model Playlist {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  createdById String?   @map("created_by") @db.Uuid
+  groupId     String?   @map("group_id") @db.Uuid
+  serviceDate DateTime? @map("service_date") @db.Date
+  isTemplate  Boolean   @default(false) @map("is_template")
+  churchId    String    @map("church_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  church        Church         @relation(fields: [churchId], references: [id])
+  createdBy     User?          @relation(fields: [createdById], references: [id])
+  group         Group?         @relation(fields: [groupId], references: [id])
+  playlistSongs PlaylistSong[]
+
+  @@index([churchId])
+  @@map("playlists")
+}
+
+model PlaylistSong {
+  id         String @id @default(uuid()) @db.Uuid
+  playlistId String @map("playlist_id") @db.Uuid
+  songId     String @map("song_id") @db.Uuid
+  position   Int
+
+  // Relations
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     Song     @relation(fields: [songId], references: [id])
+
+  @@unique([playlistId, position])
+  @@map("playlist_songs")
+}
+
+model Lesson {
+  id                  String    @id @default(uuid()) @db.Uuid
+  title               String
+  subtitle            String?
+  scriptureReference  String    @map("scripture_reference")
+  scriptureVersion    String    @default("KJV") @map("scripture_version")
+  content             Json
+  summary             String?
+  discussionQuestions String[]  @map("discussion_questions")
+  createdById         String?   @map("created_by") @db.Uuid
+  scheduledDate       DateTime? @map("scheduled_date") @db.Date
+  isPublished         Boolean   @default(false) @map("is_published")
+  isTemplate          Boolean   @default(false) @map("is_template")
+  sourceTemplateId    String?   @map("source_template_id") @db.Uuid
+  tags                String[]
+  churchId            String?   @map("church_id") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  church    Church? @relation(fields: [churchId], references: [id])
+  createdBy User?   @relation(fields: [createdById], references: [id])
+
+  @@index([churchId])
+  @@map("lessons")
+}
+
+model PrayerRequest {
+  id            String   @id @default(uuid()) @db.Uuid
+  roomId        String?  @map("room_id") @db.Uuid
+  groupId       String?  @map("group_id") @db.Uuid
+  requestedById String?  @map("requested_by") @db.Uuid
+  requesterName String   @map("requester_name")
+  requestText   String   @map("request_text")
+  status        String   @default("active")
+  isAnonymous   Boolean  @default(false) @map("is_anonymous")
+  answeredNote  String?  @map("answered_note")
+  churchId      String   @map("church_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  church      Church          @relation(fields: [churchId], references: [id])
+  room        Room?           @relation(fields: [roomId], references: [id])
+  group       Group?          @relation(fields: [groupId], references: [id])
+  requestedBy User?           @relation(fields: [requestedById], references: [id])
+  markings    PrayerMarking[]
+
+  @@index([churchId])
+  @@map("prayer_requests")
+}
+
+model PrayerMarking {
+  id              String   @id @default(uuid()) @db.Uuid
+  prayerRequestId String   @map("prayer_request_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  prayerRequest PrayerRequest @relation(fields: [prayerRequestId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@unique([prayerRequestId, userId])
+  @@map("prayer_markings")
+}
+
+model Message {
+  id          String   @id @default(uuid()) @db.Uuid
+  groupId     String   @map("group_id") @db.Uuid
+  senderId    String?  @map("sender_id") @db.Uuid
+  content     String
+  messageType String   @default("text") @map("message_type")
+  referenceId String?  @map("reference_id") @db.Uuid
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  churchId    String   @map("church_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  church Church @relation(fields: [churchId], references: [id])
+  group  Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  sender User?  @relation(fields: [senderId], references: [id])
+
+  @@index([churchId])
+  @@map("messages")
+}
+
+model VolunteerShift {
+  id            String   @id @default(uuid()) @db.Uuid
+  communityId   String?  @map("community_id") @db.Uuid
+  roomId        String?  @map("room_id") @db.Uuid
+  groupId       String?  @map("group_id") @db.Uuid
+  shiftDate     DateTime @map("shift_date") @db.Date
+  startTime     String   @map("start_time")
+  endTime       String   @map("end_time")
+  roleNeeded    String   @default("volunteer") @map("role_needed")
+  maxVolunteers Int      @default(5) @map("max_volunteers")
+  notes         String?
+  createdById   String?  @map("created_by") @db.Uuid
+  churchId      String   @map("church_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  church    Church        @relation(fields: [churchId], references: [id])
+  community Community?    @relation(fields: [communityId], references: [id])
+  room      Room?         @relation(fields: [roomId], references: [id])
+  group     Group?        @relation(fields: [groupId], references: [id])
+  createdBy User?         @relation(fields: [createdById], references: [id])
+  signups   ShiftSignup[]
+
+  @@index([churchId])
+  @@map("volunteer_shifts")
+}
+
+model ShiftSignup {
+  id         String   @id @default(uuid()) @db.Uuid
+  shiftId    String   @map("shift_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  status     String   @default("confirmed")
+  signedUpAt DateTime @default(now()) @map("signed_up_at")
+
+  // Relations
+  shift VolunteerShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id])
+
+  @@unique([shiftId, userId])
+  @@map("shift_signups")
+}
+
+model VolunteerApplication {
+  id             String    @id @default(uuid()) @db.Uuid
+  applicantName  String    @map("applicant_name")
+  email          String
+  phone          String?
+  churchName     String?   @map("church_name")
+  experience     String?
+  availability   String?
+  referencesInfo String?   @map("references_info")
+  status         String    @default("pending")
+  reviewedById   String?   @map("reviewed_by") @db.Uuid
+  reviewedAt     DateTime? @map("reviewed_at")
+  notes          String?
+  churchId       String    @map("church_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  church     Church @relation(fields: [churchId], references: [id])
+  reviewedBy User?  @relation("ReviewedBy", fields: [reviewedById], references: [id])
+
+  @@index([churchId])
+  @@map("volunteer_applications")
+}
+
+model AdminNote {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  content     String
+  category    String?
+  createdById String?  @map("created_by") @db.Uuid
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  churchId    String   @map("church_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  church    Church @relation(fields: [churchId], references: [id])
+  createdBy User?  @relation(fields: [createdById], references: [id])
+
+  @@index([churchId])
+  @@map("admin_notes")
+}
+
+model ServicePlan {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  serviceDate      DateTime? @map("service_date") @db.Date
+  communityId      String?   @map("community_id") @db.Uuid
+  roomId           String?   @map("room_id") @db.Uuid
+  groupId          String?   @map("group_id") @db.Uuid
+  createdById      String?   @map("created_by") @db.Uuid
+  isTemplate       Boolean   @default(false) @map("is_template")
+  postServiceNotes String?   @map("post_service_notes")
+  status           String    @default("draft")
+  churchId         String    @map("church_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  church    Church     @relation(fields: [churchId], references: [id])
+  community Community? @relation(fields: [communityId], references: [id])
+  room      Room?      @relation(fields: [roomId], references: [id])
+  group     Group?     @relation(fields: [groupId], references: [id])
+  createdBy User?      @relation(fields: [createdById], references: [id])
+  items     ServicePlanItem[]
+
+  @@index([churchId])
+  @@map("service_plans")
+}
+
+model ServicePlanItem {
+  id                       String @id @default(uuid()) @db.Uuid
+  servicePlanId            String @map("service_plan_id") @db.Uuid
+  position                 Int
+  type                     String
+  title                    String
+  notes                    String?
+  estimatedDurationSeconds Int    @default(180) @map("estimated_duration_seconds")
+  itemData                 Json   @default("{}") @map("item_data")
+
+  // Relations
+  servicePlan ServicePlan @relation(fields: [servicePlanId], references: [id], onDelete: Cascade)
+
+  @@unique([servicePlanId, position])
+  @@map("service_plan_items")
+}
