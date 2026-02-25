@@ -8,10 +8,16 @@ import type {
   ServicePlan,
   ServicePlanItem,
   ScriptureItemData,
+  LessonBlockItemData,
   AnnouncementItemData,
   CustomItemData,
+  LessonContent,
   PrayerRequest,
 } from "@/lib/types";
+
+interface LessonWithId extends LessonContent {
+  id: string;
+}
 
 function formatDuration(seconds: number): string {
   const mins = Math.round(seconds / 60);
@@ -19,7 +25,12 @@ function formatDuration(seconds: number): string {
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString + "T00:00:00").toLocaleDateString("en-US", {
+  // Handle both ISO datetime (2026-02-25T00:00:00.000Z) and date-only (2026-02-25)
+  const date = dateString.includes("T")
+    ? new Date(dateString)
+    : new Date(dateString + "T00:00:00");
+  if (isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -46,7 +57,18 @@ function itemTypeLabel(type: string): string {
   }
 }
 
-function ItemContent({ item }: { item: ServicePlanItem }) {
+const BLOCK_TYPE_LABELS: Record<string, string> = {
+  opening_prayer: "Opening Prayer",
+  context: "Context",
+  scripture_reading: "Scripture Reading",
+  teaching: "Teaching",
+  video: "Video",
+  discussion: "Discussion",
+  application: "Application",
+  closing_prayer: "Closing Prayer",
+};
+
+function ItemContent({ item, lessons }: { item: ServicePlanItem; lessons: LessonWithId[] }) {
   switch (item.type) {
     case "scripture": {
       const data = item.itemData as ScriptureItemData;
@@ -65,6 +87,27 @@ function ItemContent({ item }: { item: ServicePlanItem }) {
         </p>
       );
     }
+    case "lesson_block": {
+      const data = item.itemData as LessonBlockItemData;
+      const lesson = lessons.find((l) => l.id === data.lessonId);
+      if (!lesson) return null;
+      const block = lesson.blocks[data.blockIndex];
+      if (!block) return null;
+      return (
+        <div className="mt-2 space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-tertiary)]">
+            {BLOCK_TYPE_LABELS[block.type] ?? block.type}
+            {block.type === "scripture_reading" && block.reference && ` — ${block.reference}`}
+          </p>
+          {block.content && (
+            <div
+              className="text-sm text-[var(--color-text-secondary)] prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: block.content }}
+            />
+          )}
+        </div>
+      );
+    }
     default:
       return null;
   }
@@ -73,6 +116,7 @@ function ItemContent({ item }: { item: ServicePlanItem }) {
 export default function PrintServicePage() {
   const params = useParams<{ id: string }>();
   const [plan, setPlan] = useState<ServicePlan | null>(null);
+  const [lessons, setLessons] = useState<LessonWithId[]>([]);
   const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -129,6 +173,20 @@ export default function PrintServicePage() {
           ),
         };
         setPlan(mapped);
+
+        // Fetch lessons if there are lesson_block items
+        const hasLessons = mapped.items.some((i) => i.type === "lesson_block");
+        if (hasLessons) {
+          try {
+            const lessonsRes = await fetch("/api/lessons?tab=my-lessons");
+            if (lessonsRes.ok) {
+              const lessonsData = await lessonsRes.json();
+              setLessons(lessonsData.lessons ?? []);
+            }
+          } catch {
+            // Lessons are optional for print
+          }
+        }
 
         // Fetch community prayer requests if linked
         if (data.communityId) {
@@ -240,7 +298,7 @@ export default function PrintServicePage() {
                     {formatDuration(item.estimatedDurationSeconds)}
                   </span>
                 </div>
-                <ItemContent item={item} />
+                <ItemContent item={item} lessons={lessons} />
                 {item.notes && (
                   <p className="text-sm text-[var(--color-text-tertiary)] mt-1 italic">
                     Note: {item.notes}

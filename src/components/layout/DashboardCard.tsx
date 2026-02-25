@@ -20,10 +20,10 @@ export function DashboardCard({
   count,
 }: DashboardCardProps) {
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group block h-full">
       <div
         className={cn(
-          "relative overflow-hidden min-h-[140px] rounded-[var(--radius-lg)] bg-bg-card border border-border",
+          "relative overflow-hidden h-full min-h-[140px] rounded-[var(--radius-lg)] bg-bg-card border border-border",
           "shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)]",
           "transition-all duration-300 ease-out",
           "group-hover:-translate-y-0.5"
