@@ -1,5 +1,20 @@
 "use client";
 
+import { useCallback } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { ListChecks } from "lucide-react";
 import type { ServicePlanItem } from "@/lib/types";
 import { ServiceTimelineItem } from "@/components/services/ServiceTimelineItem";
@@ -7,19 +22,40 @@ import { DurationEstimate } from "@/components/services/DurationEstimate";
 
 interface ServiceTimelineProps {
   items: ServicePlanItem[];
-  onMoveUp: (index: number) => void;
-  onMoveDown: (index: number) => void;
+  onReorder: (oldIndex: number, newIndex: number) => void;
   onRemove: (index: number) => void;
   onEdit: (index: number) => void;
 }
 
 export function ServiceTimeline({
   items,
-  onMoveUp,
-  onMoveDown,
+  onReorder,
   onRemove,
   onEdit,
 }: ServiceTimelineProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onReorder(oldIndex, newIndex);
+      }
+    },
+    [items, onReorder]
+  );
+
   return (
     <div className="flex flex-col gap-3">
       {/* Header with duration estimate */}
@@ -40,20 +76,28 @@ export function ServiceTimeline({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {items.map((item, index) => (
-            <ServiceTimelineItem
-              key={item.id}
-              item={item}
-              index={index}
-              total={items.length}
-              onMoveUp={() => onMoveUp(index)}
-              onMoveDown={() => onMoveDown(index)}
-              onRemove={() => onRemove(index)}
-              onEdit={() => onEdit(index)}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={items.map((item) => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="flex flex-col gap-2">
+              {items.map((item, index) => (
+                <ServiceTimelineItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onRemove={() => onRemove(index)}
+                  onEdit={() => onEdit(index)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Save, CheckCircle, Copy, Plus } from "lucide-react";
@@ -18,6 +18,11 @@ interface LessonWithMeta extends LessonContent {
   isPublished?: boolean;
 }
 
+interface Community {
+  id: string;
+  name: string;
+}
+
 interface ServicePlanBuilderProps {
   initialPlan?: ServicePlan;
 }
@@ -32,6 +37,10 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
   const [serviceDate, setServiceDate] = useState(
     initialPlan?.serviceDate ?? ""
   );
+  const [communityId, setCommunityId] = useState(
+    initialPlan?.communityId ?? ""
+  );
+  const [communities, setCommunities] = useState<Community[]>([]);
   const [items, setItems] = useState<ServicePlanItem[]>(
     initialPlan?.items ?? []
   );
@@ -42,6 +51,27 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
   // Data arrays (to be populated from API in future)
   const [songs] = useState<Song[]>([]);
   const [lessons] = useState<LessonWithMeta[]>([]);
+
+  // Fetch communities for the dropdown
+  useEffect(() => {
+    async function fetchCommunities() {
+      try {
+        const res = await fetch("/api/communities");
+        if (res.ok) {
+          const data = await res.json();
+          setCommunities(
+            (data ?? []).map((c: { id: string; name: string }) => ({
+              id: c.id,
+              name: c.name,
+            }))
+          );
+        }
+      } catch {
+        // Communities not available
+      }
+    }
+    fetchCommunities();
+  }, []);
 
   // Add item to end of list
   const addItem = useCallback(
@@ -56,22 +86,12 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
     [items.length]
   );
 
-  // Move item up (swap with previous)
-  const moveUp = useCallback((index: number) => {
-    if (index === 0) return;
+  // Reorder items (drag-and-drop)
+  const reorderItems = useCallback((oldIndex: number, newIndex: number) => {
     setItems((prev) => {
       const next = [...prev];
-      [next[index - 1], next[index]] = [next[index], next[index - 1]];
-      return next.map((item, i) => ({ ...item, position: i }));
-    });
-  }, []);
-
-  // Move item down (swap with next)
-  const moveDown = useCallback((index: number) => {
-    setItems((prev) => {
-      if (index === prev.length - 1) return prev;
-      const next = [...prev];
-      [next[index], next[index + 1]] = [next[index + 1], next[index]];
+      const [moved] = next.splice(oldIndex, 1);
+      next.splice(newIndex, 0, moved);
       return next.map((item, i) => ({ ...item, position: i }));
     });
   }, []);
@@ -109,6 +129,7 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
         name: planName.trim() || "Untitled Service Plan",
         description: planDescription.trim() || undefined,
         serviceDate: isTemplate ? undefined : serviceDate || undefined,
+        communityId: communityId || undefined,
         isTemplate,
         status,
         items: items.map((item, i) => ({ ...item, position: i })),
@@ -184,6 +205,30 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
         </div>
         <div className="mt-4">
           <label
+            htmlFor="community-select"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
+          >
+            Community
+          </label>
+          <select
+            id="community-select"
+            value={communityId}
+            onChange={(e) => setCommunityId(e.target.value)}
+            className="w-full md:w-1/2 h-12 px-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-primary)] text-base text-[var(--color-text-primary)] focus:outline-3 focus:outline-[var(--color-ring)] focus:outline-offset-2"
+          >
+            <option value="">Select a community...</option>
+            {communities.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-sm text-[var(--color-text-tertiary)] mt-1">
+            Linking a community shows its prayer requests during the service.
+          </p>
+        </div>
+        <div className="mt-4">
+          <label
             htmlFor="plan-description"
             className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
           >
@@ -205,8 +250,7 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
         <div className="lg:col-span-3 bg-[var(--color-bg-card)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[var(--shadow-md)] p-5">
           <ServiceTimeline
             items={items}
-            onMoveUp={moveUp}
-            onMoveDown={moveDown}
+            onReorder={reorderItems}
             onRemove={removeItem}
             onEdit={openEditor}
           />

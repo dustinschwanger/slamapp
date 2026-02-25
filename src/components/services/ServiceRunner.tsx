@@ -6,6 +6,8 @@ import {
   ChevronRight,
   Monitor,
   CheckCircle,
+  Printer,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
@@ -72,7 +74,8 @@ export function ServiceRunner({ plan }: ServiceRunnerProps) {
   // Data arrays fetched from API
   const [songs, setSongs] = useState<Song[]>([]);
   const [lessons, setLessons] = useState<LessonWithId[]>([]);
-  const [prayerRequests] = useState<PrayerRequest[]>([]);
+  const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);
+  const [communityPrayerRequests, setCommunityPrayerRequests] = useState<PrayerRequest[]>([]);
 
   // Compute step groups (merges consecutive lesson blocks)
   const stepGroups = useMemo(() => computeStepGroups(plan.items), [plan.items]);
@@ -155,7 +158,15 @@ export function ServiceRunner({ plan }: ServiceRunnerProps) {
         .then((data) => setLessons(data.lessons ?? []))
         .catch(() => {});
     }
-  }, [plan.items]);
+
+    // Fetch community prayer requests if the plan is linked to a community
+    if (plan.communityId) {
+      fetch(`/api/prayer?communityId=${plan.communityId}&status=active`)
+        .then((r) => r.json())
+        .then((data) => setCommunityPrayerRequests(data.requests ?? []))
+        .catch(() => {});
+    }
+  }, [plan.items, plan.communityId]);
 
   const currentItem = plan.items[runner.currentIndex];
 
@@ -266,8 +277,19 @@ export function ServiceRunner({ plan }: ServiceRunnerProps) {
               </p>
             )}
           </div>
-          <div className="text-sm text-[var(--color-text-tertiary)]">
-            {currentItem.title}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-[var(--color-text-tertiary)]">
+              {currentItem.title}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open(`/services/${plan.id}/print`, "_blank")}
+              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] print:hidden"
+              aria-label="Print service plan"
+            >
+              <Printer className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
@@ -284,6 +306,46 @@ export function ServiceRunner({ plan }: ServiceRunnerProps) {
             onProjectLyrics={runner.toggleProjection}
             planItems={plan.items}
           />
+
+          {/* Community prayer requests (always visible at bottom) */}
+          {communityPrayerRequests.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+              <div className="flex items-center gap-2 mb-4">
+                <Heart className="w-5 h-5 text-[var(--color-prayer)]" />
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                  Prayer Requests — {plan.communityName}
+                </h3>
+                <span className="text-sm text-[var(--color-text-tertiary)]">
+                  ({communityPrayerRequests.length})
+                </span>
+              </div>
+              <div className="space-y-3">
+                {communityPrayerRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-base text-[var(--color-text-primary)]">
+                          {request.requestText}
+                        </p>
+                        <p className="text-sm text-[var(--color-text-tertiary)] mt-1">
+                          {request.isAnonymous ? "Anonymous" : request.requesterName}
+                          {request.room && ` — ${request.room}`}
+                        </p>
+                      </div>
+                      {request.status === "urgent" && (
+                        <span className="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--color-warning)]20 text-[var(--color-warning)]">
+                          Urgent
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom navigation bar */}

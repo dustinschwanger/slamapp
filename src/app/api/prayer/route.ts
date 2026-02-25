@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const status = searchParams.get("status");
     const myPrayers = searchParams.get("myPrayers") === "true";
+    const communityId = searchParams.get("communityId");
 
     const where: Record<string, unknown> = {
       churchId: auth.churchId,
@@ -28,6 +29,13 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // Filter by community (prayer requests are linked via room → community)
+    if (communityId) {
+      where.room = {
+        communityId: communityId,
+      };
+    }
+
     const requests = await db.prayerRequest.findMany({
       where,
       include: {
@@ -35,7 +43,13 @@ export async function GET(request: NextRequest) {
           select: { userId: true },
         },
         room: {
-          select: { id: true, name: true },
+          select: {
+            id: true,
+            name: true,
+            community: {
+              select: { id: true, name: true },
+            },
+          },
         },
         requestedBy: {
           select: { id: true, firstName: true, lastName: true },
@@ -49,8 +63,8 @@ export async function GET(request: NextRequest) {
       id: r.id,
       requesterName: r.requesterName,
       requestText: r.requestText,
-      communityId: "",
-      communityName: "",
+      communityId: r.room?.community?.id ?? "",
+      communityName: r.room?.community?.name ?? "",
       room: r.room?.name ?? undefined,
       status: r.status as "active" | "answered" | "urgent",
       isAnonymous: r.isAnonymous,

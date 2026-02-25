@@ -365,7 +365,7 @@ export default function VolunteerPage() {
               No upcoming shifts
             </p>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              Shifts will appear here once they are scheduled.
+              Shifts help coordinate who visits which community and when. Admins and leaders can create shifts from the button above.
             </p>
           </div>
         )}

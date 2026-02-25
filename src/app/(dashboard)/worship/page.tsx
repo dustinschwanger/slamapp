@@ -132,7 +132,7 @@ export default function WorshipPage() {
               </p>
               <p className="text-sm">
                 {songs.length === 0
-                  ? "Songs will appear here once added"
+                  ? "Your church\u2019s song library is empty. Ask an admin to add hymns, or browse the Admin hub to upload songs and lyrics."
                   : "Try a different search or filter"}
               </p>
             </div>

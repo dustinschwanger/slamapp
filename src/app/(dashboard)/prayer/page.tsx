@@ -116,7 +116,7 @@ export default function PrayerPage() {
           <Heart className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p className="text-lg font-medium">No prayer requests</p>
           <p className="text-sm mt-1">
-            Prayer requests will appear here once created
+            Submit prayer requests for residents you visit. Your church team can see and pray along with you.
           </p>
         </div>
       );

@@ -158,7 +158,7 @@ export default function ServicesPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <p className="text-base text-[var(--color-text-secondary)]">
-                No service plans yet. Create your first one to get started.
+                Service plans let you organize songs, lessons, and prayer times into a runnable order for your next visit. Create your first plan to get started.
               </p>
             </CardContent>
           </Card>

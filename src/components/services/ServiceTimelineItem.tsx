@@ -7,20 +7,18 @@ import {
   Heart,
   Megaphone,
   FileText,
-  ChevronUp,
-  ChevronDown,
+  GripVertical,
   Pencil,
   X,
 } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils/cn";
 import type { ServicePlanItem, ServicePlanItemType } from "@/lib/types";
 
 interface ServiceTimelineItemProps {
   item: ServicePlanItem;
   index: number;
-  total: number;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
   onRemove: () => void;
   onEdit: () => void;
 }
@@ -46,21 +44,47 @@ function formatDuration(seconds: number): string {
 export function ServiceTimelineItem({
   item,
   index,
-  total,
-  onMoveUp,
-  onMoveDown,
   onRemove,
   onEdit,
 }: ServiceTimelineItemProps) {
   const config = typeConfig[item.type];
   const Icon = config.icon;
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={cn(
-        "flex items-center gap-3 p-3 bg-[var(--color-bg-surface)] rounded-[var(--radius-md)] border border-[var(--color-border)]"
+        "flex items-center gap-3 p-3 bg-[var(--color-bg-surface)] rounded-[var(--radius-md)] border border-[var(--color-border)]",
+        isDragging && "opacity-50 shadow-lg z-10 relative"
       )}
     >
+      {/* Drag handle */}
+      <button
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="p-1 min-w-[36px] min-h-[48px] flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] cursor-grab active:cursor-grabbing transition-colors touch-none shrink-0"
+        aria-label={`Drag to reorder ${item.title}`}
+      >
+        <GripVertical className="w-5 h-5" />
+      </button>
+
       {/* Position number */}
       <span className="text-sm font-semibold text-[var(--color-text-tertiary)] w-6 text-center shrink-0">
         {index + 1}
@@ -92,22 +116,6 @@ export function ServiceTimelineItem({
 
       {/* Action buttons */}
       <div className="flex items-center gap-1 shrink-0">
-        <button
-          onClick={onMoveUp}
-          disabled={index === 0}
-          className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label={`Move ${item.title} up`}
-        >
-          <ChevronUp className="w-5 h-5" />
-        </button>
-        <button
-          onClick={onMoveDown}
-          disabled={index === total - 1}
-          className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-secondary)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label={`Move ${item.title} down`}
-        >
-          <ChevronDown className="w-5 h-5" />
-        </button>
         <button
           onClick={onEdit}
           className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"

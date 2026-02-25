@@ -113,7 +113,7 @@ export default function GroupsPage() {
                   You are not a member of any groups yet
                 </p>
                 <p className="text-sm text-[var(--color-text-tertiary)]">
-                  Browse All Groups to find one to join, or create a new group.
+                  Switch to the &quot;All Groups&quot; tab to browse and join an existing group, or ask a leader to create one.
                 </p>
               </div>
             ) : (
@@ -130,7 +130,7 @@ export default function GroupsPage() {
               <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-bg-card)] p-10 text-center">
                 <Users className="h-8 w-8 mx-auto mb-2 text-[var(--color-text-tertiary)]" />
                 <p className="text-base text-[var(--color-text-secondary)]">
-                  No groups have been created yet.
+                  No groups have been created yet. Groups help organize your ministry teams by community or meeting schedule.
                 </p>
               </div>
             ) : (

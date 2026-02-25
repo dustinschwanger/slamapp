@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BookOpen } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Header } from "@/components/layout/Header";
@@ -34,16 +35,24 @@ export default async function DashboardLayout({
   // User not assigned to a church yet (super admins can bypass this)
   if (authContext && !authContext.churchId && !authContext.isSuperAdmin) {
     return (
-      <div className="flex min-h-screen bg-bg-primary items-center justify-center">
-        <div className="max-w-md text-center p-8">
-          <h1 className="text-2xl font-bold text-text-primary mb-4">
+      <div className="flex min-h-screen bg-bg-primary items-center justify-center p-4">
+        <div className="max-w-md text-center rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-lg)] p-8">
+          <div className="flex items-center justify-center h-14 w-14 rounded-full bg-[var(--color-primary)]10 mx-auto mb-5">
+            <BookOpen className="h-7 w-7 text-[var(--color-primary)]" />
+          </div>
+          <h1 className="text-2xl font-bold text-text-primary mb-3">
             Welcome, {authContext.firstName}!
           </h1>
-          <p className="text-text-secondary text-lg">
+          <p className="text-text-secondary text-base leading-relaxed mb-4">
+            SLAM helps your team plan and coordinate nursing home ministry
+            visits — from worship songs and Bible lessons to prayer requests
+            and scheduling.
+          </p>
+          <p className="text-text-secondary text-base leading-relaxed">
             Your account has been created. A church administrator needs to
             assign you to a church before you can access the app.
           </p>
-          <p className="text-text-tertiary mt-4">
+          <p className="text-text-tertiary mt-4 text-sm">
             Please contact your church administrator or check back later.
           </p>
         </div>

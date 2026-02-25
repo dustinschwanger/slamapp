@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "SLAM - Senior Living Alliance Ministry",
   description: "Plan, run, and coordinate nursing home ministry services and Bible lessons",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

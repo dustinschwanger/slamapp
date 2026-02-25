@@ -8,13 +8,28 @@ import {
   Save,
   Plus,
   Trash2,
-  ChevronUp,
-  ChevronDown,
+  GripVertical,
   Loader2,
   BookOpen,
   Monitor,
   Video,
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,15 +45,23 @@ interface LessonEditorProps {
   lessonId: string;
 }
 
+interface BlockWithId extends LessonBlock {
+  _id: string;
+}
+
 interface LessonFormData {
   title: string;
   subtitle: string;
   scriptureReference: string;
   scriptureVersion: string;
-  blocks: LessonBlock[];
+  blocks: BlockWithId[];
   discussionQuestions: string[];
   notes: string;
   scheduledDate: string;
+}
+
+function withId(block: LessonBlock): BlockWithId {
+  return { ...block, _id: crypto.randomUUID() };
 }
 
 const BLOCK_TYPES: LessonBlockType[] = [
@@ -81,7 +104,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
           subtitle: data.subtitle || "",
           scriptureReference: data.scripture?.primary || "",
           scriptureVersion: "KJV",
-          blocks: data.blocks || [],
+          blocks: (data.blocks || []).map((b: LessonBlock) => withId(b)),
           discussionQuestions: data.discussionQuestions || [],
           notes: data.notes || "",
           scheduledDate: data.scheduledDate || "",
@@ -115,7 +138,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
           subtitle: formData.subtitle,
           scriptureReference: formData.scriptureReference,
           scriptureVersion: formData.scriptureVersion,
-          blocks: formData.blocks,
+          blocks: formData.blocks.map(({ _id, ...rest }) => rest),
           discussionQuestions: [],
           notes: formData.notes,
           scheduledDate: formData.scheduledDate || null,
@@ -141,7 +164,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
       ...prev,
       blocks: [
         ...prev.blocks,
-        {
+        withId({
           type,
           content: "",
           projectable: type !== "video",
@@ -149,7 +172,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
             ? { reference: "", version: "KJV" }
             : {}),
           ...(type === "video" ? { videoUrl: "" } : {}),
-        },
+        }),
       ],
     }));
   };
@@ -170,12 +193,11 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
     }));
   };
 
-  const moveBlock = (index: number, direction: "up" | "down") => {
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= formData.blocks.length) return;
+  const reorderBlock = (oldIndex: number, newIndex: number) => {
     setFormData((prev) => {
       const blocks = [...prev.blocks];
-      [blocks[index], blocks[newIndex]] = [blocks[newIndex], blocks[index]];
+      const [moved] = blocks.splice(oldIndex, 1);
+      blocks.splice(newIndex, 0, moved);
       return { ...prev, blocks };
     });
   };
@@ -304,120 +326,12 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
           ))}
         </div>
 
-        <div className="space-y-4">
-          {formData.blocks.map((block, index) => (
-            <Card key={index} className="relative">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex flex-col gap-0.5 pt-1">
-                    <button
-                      onClick={() => moveBlock(index, "up")}
-                      disabled={index === 0}
-                      className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30"
-                      aria-label="Move block up"
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => moveBlock(index, "down")}
-                      disabled={index === formData.blocks.length - 1}
-                      className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30"
-                      aria-label="Move block down"
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <select
-                        value={block.type}
-                        onChange={(e) =>
-                          updateBlock(index, {
-                            type: e.target.value as LessonBlockType,
-                          })
-                        }
-                        className="h-10 rounded-[var(--radius-md)] border border-border bg-bg-card px-3 text-sm text-text-primary"
-                      >
-                        {BLOCK_TYPES.map((type) => (
-                          <option key={type} value={type}>
-                            {BLOCK_TYPE_LABELS[type]}
-                          </option>
-                        ))}
-                      </select>
-                      <Badge
-                        variant={block.projectable ? "default" : "secondary"}
-                        className="cursor-pointer"
-                        onClick={() =>
-                          updateBlock(index, {
-                            projectable: !block.projectable,
-                          })
-                        }
-                      >
-                        <Monitor className="h-3 w-3 mr-1" />
-                        {block.projectable ? "Projectable" : "Not Projectable"}
-                      </Badge>
-                      <div className="flex-1" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeBlock(index)}
-                        className="text-text-tertiary hover:text-error"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {block.type === "scripture_reading" && (
-                      <Input
-                        value={block.reference || ""}
-                        onChange={(e) =>
-                          updateBlock(index, { reference: e.target.value })
-                        }
-                        placeholder="Scripture reference (e.g., John 3:16-21)"
-                      />
-                    )}
-                    {block.type === "video" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Video className="h-4 w-4 text-text-tertiary shrink-0" />
-                          <Input
-                            value={block.videoUrl || ""}
-                            onChange={(e) =>
-                              updateBlock(index, { videoUrl: e.target.value })
-                            }
-                            placeholder="YouTube or Vimeo URL"
-                          />
-                        </div>
-                        {block.videoUrl && isValidVideoUrl(block.videoUrl) && (
-                          <div className="rounded-[var(--radius-md)] overflow-hidden border border-border aspect-video">
-                            <iframe
-                              src={getEmbedUrl(block.videoUrl) || ""}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              title="Video preview"
-                            />
-                          </div>
-                        )}
-                        {block.videoUrl && !isValidVideoUrl(block.videoUrl) && block.videoUrl.trim() !== "" && (
-                          <p className="text-sm text-error">
-                            Please enter a valid YouTube or Vimeo URL
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    <RichTextEditor
-                      content={block.content}
-                      onChange={(html) =>
-                        updateBlock(index, { content: html })
-                      }
-                      placeholder="Block content..."
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <LessonBlockList
+          blocks={formData.blocks}
+          onReorder={reorderBlock}
+          onUpdate={updateBlock}
+          onRemove={removeBlock}
+        />
 
       </div>
 
@@ -455,5 +369,206 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
         </Button>
       </div>
     </div>
+  );
+}
+
+// --- Drag-and-drop block list ---
+
+interface LessonBlockListProps {
+  blocks: BlockWithId[];
+  onReorder: (oldIndex: number, newIndex: number) => void;
+  onUpdate: (index: number, updates: Partial<LessonBlock>) => void;
+  onRemove: (index: number) => void;
+}
+
+function LessonBlockList({
+  blocks,
+  onReorder,
+  onUpdate,
+  onRemove,
+}: LessonBlockListProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = React.useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = blocks.findIndex((b) => b._id === active.id);
+      const newIndex = blocks.findIndex((b) => b._id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onReorder(oldIndex, newIndex);
+      }
+    },
+    [blocks, onReorder]
+  );
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={blocks.map((b) => b._id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div className="space-y-4">
+          {blocks.map((block, index) => (
+            <SortableLessonBlock
+              key={block._id}
+              block={block}
+              index={index}
+              onUpdate={onUpdate}
+              onRemove={onRemove}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+interface SortableLessonBlockProps {
+  block: BlockWithId;
+  index: number;
+  onUpdate: (index: number, updates: Partial<LessonBlock>) => void;
+  onRemove: (index: number) => void;
+}
+
+function SortableLessonBlock({
+  block,
+  index,
+  onUpdate,
+  onRemove,
+}: SortableLessonBlockProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={isDragging ? "relative z-10 opacity-50 shadow-lg" : "relative"}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <button
+            ref={setActivatorNodeRef}
+            {...attributes}
+            {...listeners}
+            className="p-1 mt-1 min-h-[36px] flex items-center justify-center rounded-[var(--radius-sm)] text-text-tertiary hover:text-text-primary hover:bg-bg-secondary cursor-grab active:cursor-grabbing transition-colors touch-none"
+            aria-label="Drag to reorder block"
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center gap-3">
+              <select
+                value={block.type}
+                onChange={(e) =>
+                  onUpdate(index, {
+                    type: e.target.value as LessonBlockType,
+                  })
+                }
+                className="h-10 rounded-[var(--radius-md)] border border-border bg-bg-card px-3 text-sm text-text-primary"
+              >
+                {BLOCK_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {BLOCK_TYPE_LABELS[type]}
+                  </option>
+                ))}
+              </select>
+              <Badge
+                variant={block.projectable ? "default" : "secondary"}
+                className="cursor-pointer"
+                onClick={() =>
+                  onUpdate(index, {
+                    projectable: !block.projectable,
+                  })
+                }
+              >
+                <Monitor className="h-3 w-3 mr-1" />
+                {block.projectable ? "Projectable" : "Not Projectable"}
+              </Badge>
+              <div className="flex-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(index)}
+                className="text-text-tertiary hover:text-error"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            {block.type === "scripture_reading" && (
+              <Input
+                value={block.reference || ""}
+                onChange={(e) =>
+                  onUpdate(index, { reference: e.target.value })
+                }
+                placeholder="Scripture reference (e.g., John 3:16-21)"
+              />
+            )}
+            {block.type === "video" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-text-tertiary shrink-0" />
+                  <Input
+                    value={block.videoUrl || ""}
+                    onChange={(e) =>
+                      onUpdate(index, { videoUrl: e.target.value })
+                    }
+                    placeholder="YouTube or Vimeo URL"
+                  />
+                </div>
+                {block.videoUrl && isValidVideoUrl(block.videoUrl) && (
+                  <div className="rounded-[var(--radius-md)] overflow-hidden border border-border aspect-video">
+                    <iframe
+                      src={getEmbedUrl(block.videoUrl) || ""}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Video preview"
+                    />
+                  </div>
+                )}
+                {block.videoUrl && !isValidVideoUrl(block.videoUrl) && block.videoUrl.trim() !== "" && (
+                  <p className="text-sm text-error">
+                    Please enter a valid YouTube or Vimeo URL
+                  </p>
+                )}
+              </div>
+            )}
+            <RichTextEditor
+              content={block.content}
+              onChange={(html) =>
+                onUpdate(index, { content: html })
+              }
+              placeholder="Block content..."
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
