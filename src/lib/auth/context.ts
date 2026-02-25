@@ -48,21 +48,58 @@ export async function getAuthContext(): Promise<ResolvedAuth> {
 
   if (!user) {
     // User exists in Clerk but not in DB yet — may happen before webhook fires.
-    // Auto-create from Clerk data.
     const clerkUser = await currentUser();
     if (!clerkUser) {
       throw new AuthError("User not found", 403);
     }
 
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+
+    // Check if this user was pre-invited (has a pending_ clerkId).
+    // Link the pre-invited record to the real Clerk account, preserving role and churchId.
+    const preInvited = email
+      ? await db.user.findUnique({ where: { email } })
+      : null;
+
+    if (preInvited && preInvited.clerkId.startsWith("pending_")) {
+      const linked = await db.user.update({
+        where: { id: preInvited.id },
+        data: {
+          clerkId,
+          firstName: clerkUser.firstName ?? preInvited.firstName,
+          lastName: clerkUser.lastName ?? preInvited.lastName,
+          phone: clerkUser.phoneNumbers[0]?.phoneNumber ?? null,
+          avatarUrl: clerkUser.imageUrl,
+        },
+        include: {
+          church: { select: { id: true, name: true } },
+        },
+      });
+
+      const linkedRole = linked.role as UserRole;
+      return {
+        userId: linked.id,
+        clerkId,
+        churchId: linked.churchId,
+        role: linkedRole,
+        firstName: linked.firstName,
+        lastName: linked.lastName,
+        churchName: linked.church?.name ?? null,
+        isSuperAdmin: linkedRole === "super_admin",
+      };
+    }
+
+    // Truly new user — create with default role
     const newUser = await db.user.create({
       data: {
         clerkId,
-        email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
+        email,
         firstName: clerkUser.firstName ?? "",
         lastName: clerkUser.lastName ?? "",
         phone: clerkUser.phoneNumbers[0]?.phoneNumber ?? null,
         avatarUrl: clerkUser.imageUrl,
         role: "member",
+        churchId: null,
       },
       include: {
         church: { select: { id: true, name: true } },
