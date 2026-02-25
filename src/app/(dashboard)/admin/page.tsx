@@ -29,7 +29,6 @@ interface Stats {
   prayerRequests: { active: number; thisWeek: number; total: number; answeredThisMonth: number };
   shifts: { upcoming: number; thisMonth: number };
   services: { completed: number; upcoming: number; thisMonth: number };
-  applications: { pending: number };
 }
 
 interface AdminNote {
@@ -44,7 +43,6 @@ interface AdminNote {
 
 const quickLinks = [
   { label: "Manage Communities", href: "/admin/communities", icon: Building2 },
-  { label: "Review Applications", href: "/admin/applications", icon: Users },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Service Templates", href: "/services/templates", icon: ClipboardList },
 ];

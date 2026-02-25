@@ -19,6 +19,9 @@ const planInclude = {
   createdBy: {
     select: { id: true, firstName: true, lastName: true },
   },
+  _count: {
+    select: { items: true },
+  },
 };
 
 export async function GET(request: NextRequest) {

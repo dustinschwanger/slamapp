@@ -150,7 +150,7 @@ export function ServiceRunner({ plan }: ServiceRunnerProps) {
         .catch(() => {});
     }
     if (hasLessons) {
-      fetch("/api/lessons")
+      fetch("/api/lessons?tab=my-lessons")
         .then((r) => r.json())
         .then((data) => setLessons(data.lessons ?? []))
         .catch(() => {});

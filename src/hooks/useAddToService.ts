@@ -34,6 +34,7 @@ export function useAddToService() {
       return res.json();
     },
     enabled: isOpen,
+    staleTime: 0,
   });
 
   const openDialog = useCallback((items: NewItem | NewItem[]) => {

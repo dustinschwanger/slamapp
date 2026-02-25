@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCircle, ClipboardList, Copy, Pencil } from "lucide-react";
+import { ClipboardList, Copy, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonBlockRenderer } from "./LessonBlockRenderer";
@@ -107,26 +107,6 @@ export function LessonViewer({
           onAddToService={onAddBlockToService}
         />
       ))}
-
-      {/* Discussion Questions */}
-      {lesson.discussionQuestions.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <h3 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            Discussion Questions
-          </h3>
-          <ol className="list-decimal list-outside ml-6 space-y-3">
-            {lesson.discussionQuestions.map((question, i) => (
-              <li
-                key={i}
-                className="text-lg text-text-primary font-reading leading-relaxed pl-2"
-              >
-                {question}
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
 
       {/* Notes */}
       {lesson.notes && (

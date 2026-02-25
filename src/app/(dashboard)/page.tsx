@@ -54,7 +54,7 @@ const hubs = [
     countKey: "prayer" as const,
   },
   {
-    title: "Volunteer",
+    title: "Volunteers",
     description: "Scheduling, calendar, and directory",
     icon: Calendar,
     href: "/volunteer",
@@ -63,11 +63,11 @@ const hubs = [
   },
   {
     title: "Admin",
-    description: "Metrics, applications, and content management",
+    description: "Metrics, communities, and content management",
     icon: Settings,
     href: "/admin",
     accentColor: "#6B6580",
-    countKey: "applications" as const,
+    countKey: null,
   },
 ];
 
@@ -76,7 +76,6 @@ interface AnalyticsData {
   prayerRequests: { active: number };
   groups: { total: number };
   shifts: { upcoming: number };
-  applications: { pending: number };
 }
 
 function getGreeting(): string {
@@ -100,8 +99,6 @@ function getCount(
       return data.groups.total;
     case "shifts":
       return data.shifts.upcoming;
-    case "applications":
-      return data.applications.pending;
     default:
       return undefined;
   }

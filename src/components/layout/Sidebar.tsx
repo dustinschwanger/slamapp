@@ -28,7 +28,7 @@ const navItems = [
   { label: "Lessons", href: "/reading", icon: BookOpen },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Prayer", href: "/prayer", icon: Heart },
-  { label: "Volunteer", href: "/volunteer", icon: Calendar },
+  { label: "Volunteers", href: "/volunteer", icon: Calendar },
   { label: "Admin", href: "/admin", icon: Settings },
   { label: "Communities", href: "/admin/communities", icon: Building2 },
 ];

@@ -33,7 +33,6 @@ export async function GET() {
       groupMembers,
       shiftsUpcoming,
       shiftsThisMonth,
-      pendingApplications,
     ] = await Promise.all([
       db.community.count({ where: { churchId } }),
       db.community.count({ where: { churchId, isActive: true } }),
@@ -88,9 +87,6 @@ export async function GET() {
           shiftDate: { gte: startOfMonth },
         },
       }),
-      db.volunteerApplication.count({
-        where: { churchId, status: "pending" },
-      }),
     ]);
 
     return NextResponse.json({
@@ -109,7 +105,6 @@ export async function GET() {
       },
       groups: { total: groupsTotal, totalMembers: groupMembers },
       shifts: { upcoming: shiftsUpcoming, thisMonth: shiftsThisMonth },
-      applications: { pending: pendingApplications },
     });
   } catch (error) {
     return handleApiError(error);

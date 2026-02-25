@@ -8,7 +8,8 @@ import {
   Save,
   Plus,
   Trash2,
-  GripVertical,
+  ChevronUp,
+  ChevronDown,
   Loader2,
   BookOpen,
   Monitor,
@@ -115,9 +116,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
           scriptureReference: formData.scriptureReference,
           scriptureVersion: formData.scriptureVersion,
           blocks: formData.blocks,
-          discussionQuestions: formData.discussionQuestions.filter(
-            (q) => q.trim()
-          ),
+          discussionQuestions: [],
           notes: formData.notes,
           scheduledDate: formData.scheduledDate || null,
         }),
@@ -179,31 +178,6 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
       [blocks[index], blocks[newIndex]] = [blocks[newIndex], blocks[index]];
       return { ...prev, blocks };
     });
-  };
-
-  const addQuestion = () => {
-    setFormData((prev) => ({
-      ...prev,
-      discussionQuestions: [...prev.discussionQuestions, ""],
-    }));
-  };
-
-  const updateQuestion = (index: number, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      discussionQuestions: prev.discussionQuestions.map((q, i) =>
-        i === index ? value : q
-      ),
-    }));
-  };
-
-  const removeQuestion = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      discussionQuestions: prev.discussionQuestions.filter(
-        (_, i) => i !== index
-      ),
-    }));
   };
 
   if (loading) {
@@ -314,19 +288,43 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
         <h3 className="text-lg font-semibold text-text-primary mb-3">
           Content Blocks
         </h3>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {BLOCK_TYPES.map((type) => (
+            <Button
+              key={type}
+              variant="outline"
+              size="sm"
+              onClick={() => addBlock(type)}
+              className="gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {BLOCK_TYPE_LABELS[type]}
+            </Button>
+          ))}
+        </div>
+
         <div className="space-y-4">
           {formData.blocks.map((block, index) => (
             <Card key={index} className="relative">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex flex-col gap-1 pt-1">
+                  <div className="flex flex-col gap-0.5 pt-1">
                     <button
                       onClick={() => moveBlock(index, "up")}
                       disabled={index === 0}
                       className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30"
                       aria-label="Move block up"
                     >
-                      <GripVertical className="h-4 w-4" />
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => moveBlock(index, "down")}
+                      disabled={index === formData.blocks.length - 1}
+                      className="p-1 text-text-tertiary hover:text-text-primary disabled:opacity-30"
+                      aria-label="Move block down"
+                    >
+                      <ChevronDown className="h-4 w-4" />
                     </button>
                   </div>
                   <div className="flex-1 space-y-3">
@@ -421,59 +419,6 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-4">
-          {BLOCK_TYPES.map((type) => (
-            <Button
-              key={type}
-              variant="outline"
-              size="sm"
-              onClick={() => addBlock(type)}
-              className="gap-1.5"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              {BLOCK_TYPE_LABELS[type]}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Discussion Questions */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-3">
-          Discussion Questions
-        </h3>
-        <div className="space-y-3">
-          {formData.discussionQuestions.map((question, index) => (
-            <div key={index} className="flex gap-2">
-              <span className="text-text-tertiary pt-2.5 text-sm min-w-[24px]">
-                {index + 1}.
-              </span>
-              <Input
-                value={question}
-                onChange={(e) => updateQuestion(index, e.target.value)}
-                placeholder="Enter a discussion question..."
-                className="flex-1"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeQuestion(index)}
-                className="text-text-tertiary hover:text-error shrink-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={addQuestion}
-          className="mt-3 gap-1.5"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add Question
-        </Button>
       </div>
 
       {/* Notes */}

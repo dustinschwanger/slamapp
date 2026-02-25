@@ -16,6 +16,7 @@ interface PlanOption {
   serviceDate: string | null;
   status: string;
   items?: unknown[];
+  _count?: { items: number };
   community?: { name: string } | null;
 }
 
@@ -79,7 +80,7 @@ export function AddToServiceDialog({
             </div>
           ) : (
             plans.map((plan) => {
-              const itemCount = plan.items?.length ?? 0;
+              const itemCount = plan._count?.items ?? plan.items?.length ?? 0;
               return (
                 <button
                   key={plan.id}

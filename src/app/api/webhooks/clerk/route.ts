@@ -62,28 +62,46 @@ export async function POST(req: Request) {
     const email = data.email_addresses[0]?.email_address ?? "";
     const phone = data.phone_numbers[0]?.phone_number ?? null;
 
-    // New users get churchId: null, role: "member"
-    // Super admin assigns church via super-admin UI
-    await db.user.upsert({
-      where: { clerkId: data.id },
-      create: {
-        clerkId: data.id,
-        email,
-        firstName: data.first_name ?? "",
-        lastName: data.last_name ?? "",
-        phone,
-        avatarUrl: data.image_url,
-        role: "member",
-        churchId: null,
-      },
-      update: {
-        email,
-        firstName: data.first_name ?? "",
-        lastName: data.last_name ?? "",
-        phone,
-        avatarUrl: data.image_url,
-      },
-    });
+    // Check if this user was pre-invited (has a pending_ clerkId)
+    const preInvited = await db.user.findUnique({ where: { email } });
+
+    if (preInvited && preInvited.clerkId.startsWith("pending_")) {
+      // Link the pre-invited record to the real Clerk account.
+      // Preserve churchId and role that were set during invitation.
+      await db.user.update({
+        where: { id: preInvited.id },
+        data: {
+          clerkId: data.id,
+          firstName: data.first_name ?? preInvited.firstName,
+          lastName: data.last_name ?? preInvited.lastName,
+          phone,
+          avatarUrl: data.image_url,
+        },
+      });
+    } else {
+      // New users get churchId: null, role: "member"
+      // Super admin assigns church via super-admin UI
+      await db.user.upsert({
+        where: { clerkId: data.id },
+        create: {
+          clerkId: data.id,
+          email,
+          firstName: data.first_name ?? "",
+          lastName: data.last_name ?? "",
+          phone,
+          avatarUrl: data.image_url,
+          role: "member",
+          churchId: null,
+        },
+        update: {
+          email,
+          firstName: data.first_name ?? "",
+          lastName: data.last_name ?? "",
+          phone,
+          avatarUrl: data.image_url,
+        },
+      });
+    }
   }
 
   if (type === "user.updated") {
