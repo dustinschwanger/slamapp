@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Building2, Users, UserX } from "lucide-react";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function SuperAdminDashboard() {
   const [churchCount, userCount, unassignedCount] = await Promise.all([
     db.church.count({ where: { isActive: true } }),

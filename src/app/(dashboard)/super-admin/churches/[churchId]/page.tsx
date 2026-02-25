@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { ChurchDetailClient } from "./ChurchDetailClient";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ churchId: string }>;
 }

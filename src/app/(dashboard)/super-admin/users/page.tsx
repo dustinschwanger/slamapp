@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { UsersClient } from "./UsersClient";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   searchParams: Promise<{ unassigned?: string }>;
 }

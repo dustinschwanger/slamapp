@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Plus, Building2, MapPin, Users, CheckCircle, XCircle } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+
+export const dynamic = "force-dynamic";
 import { Badge } from "@/components/ui/badge";
 
 export default async function ChurchesPage() {
