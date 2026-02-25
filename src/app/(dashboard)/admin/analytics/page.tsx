@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   BarChart3,
   Building2,
   Users,
@@ -13,7 +12,6 @@ import {
   Loader2,
   Inbox,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface AnalyticsData {
@@ -197,14 +195,6 @@ export default function AnalyticsPage() {
 
   return (
     <div className="max-w-4xl">
-      {/* Back button */}
-      <Link href="/admin" className="inline-block mb-6">
-        <Button variant="ghost" size="sm">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Admin
-        </Button>
-      </Link>
-
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="flex items-center justify-center h-10 w-10 rounded-[var(--radius-md)] bg-[#2D5A8E18]">

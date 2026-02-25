@@ -7,7 +7,7 @@ import {
   ClipboardList,
   Music,
   Heart,
-  MoreHorizontal,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -16,7 +16,7 @@ const navItems = [
   { label: "Services", href: "/services", icon: ClipboardList },
   { label: "Worship", href: "/worship", icon: Music },
   { label: "Prayer", href: "/prayer", icon: Heart },
-  { label: "More", href: "/more", icon: MoreHorizontal },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ];
 
 export function BottomNav() {

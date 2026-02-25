@@ -9,7 +9,6 @@ import {
   Users,
   Heart,
   Calendar,
-  Settings,
   CheckCircle2,
   Circle,
   X,
@@ -66,14 +65,6 @@ const hubs = [
     href: "/volunteer",
     accentColor: "#2E7D4F",
     countKey: "shifts" as const,
-  },
-  {
-    title: "Admin",
-    description: "Metrics, communities, and content management",
-    icon: Settings,
-    href: "/admin",
-    accentColor: "#6B6580",
-    countKey: null,
   },
 ];
 

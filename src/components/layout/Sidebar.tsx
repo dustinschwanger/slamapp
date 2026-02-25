@@ -11,7 +11,7 @@ import {
   Users,
   Heart,
   Calendar,
-  Settings,
+  BarChart3,
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
@@ -29,7 +29,7 @@ const navItems = [
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Prayer", href: "/prayer", icon: Heart },
   { label: "Volunteers", href: "/volunteer", icon: Calendar },
-  { label: "Admin", href: "/admin", icon: Settings },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Communities", href: "/admin/communities", icon: Building2 },
 ];
 
