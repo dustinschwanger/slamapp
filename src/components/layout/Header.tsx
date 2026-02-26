@@ -11,6 +11,7 @@ const hubTitles: Record<string, string> = {
   "/reading": "Reading Hub",
   "/groups": "Group Hub",
   "/prayer": "Prayer Requests",
+  "/visit-guide": "Visit Guide",
   "/volunteer": "Volunteers",
   "/admin": "Admin Hub",
 };
