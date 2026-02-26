@@ -32,9 +32,8 @@ export default async function DashboardLayout({
     // For other auth errors, show the layout but children will handle it
   }
 
-  // User not assigned to a church yet (super admins and anonymous users can bypass this)
-  const isAnonymous = authContext?.userId === "anonymous";
-  if (authContext && !authContext.churchId && !authContext.isSuperAdmin && !isAnonymous) {
+  // User not assigned to a church yet (super admins can bypass this)
+  if (authContext && !authContext.churchId && !authContext.isSuperAdmin) {
     return (
       <div className="flex min-h-screen bg-bg-primary items-center justify-center p-4">
         <div className="max-w-md text-center rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-lg)] p-8">

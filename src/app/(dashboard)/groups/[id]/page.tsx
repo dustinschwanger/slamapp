@@ -8,7 +8,6 @@ import {
   Users,
   MapPin,
   Clock,
-  MessageCircle,
   Loader2,
   UserPlus,
   UserMinus,
@@ -28,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useChurch } from "@/components/providers/ChurchProvider";
+import { ChatWindow } from "@/components/groups/ChatWindow";
 import type { Group } from "@/lib/types";
 
 interface GroupMember {
@@ -53,7 +53,7 @@ export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
   const groupId = params.id as string;
-  const { userId, userRole } = useChurch();
+  const { userId, userRole, churchId } = useChurch();
 
   const [group, setGroup] = React.useState<Group | null>(null);
   const [members, setMembers] = React.useState<GroupMember[]>([]);
@@ -118,14 +118,17 @@ export default function GroupDetailPage() {
     setIsLoadingUsers(true);
 
     try {
-      const res = await fetch("/api/super-admin/users");
+      const url =
+        userRole === "super_admin" && churchId
+          ? `/api/users?churchId=${churchId}`
+          : "/api/users";
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setChurchUsers(Array.isArray(data) ? data : data.users ?? []);
+        setChurchUsers(data);
       }
     } catch {
-      // Fallback: users list may not be available to non-super-admins
-      // In that case the dialog still opens but shows no users
+      // Users list may not be available if the user lacks permissions
     } finally {
       setIsLoadingUsers(false);
     }
@@ -282,12 +285,6 @@ export default function GroupDetailPage() {
           </div>
         </div>
 
-        <Link href={`/groups/${groupId}/chat`}>
-          <Button variant="default" size="default">
-            <MessageCircle className="h-4 w-4" />
-            Group Chat
-          </Button>
-        </Link>
       </div>
 
       {/* Group Info Card */}
@@ -336,6 +333,15 @@ export default function GroupDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Inline Chat */}
+      <div className="mb-6">
+        <ChatWindow
+          groupId={groupId}
+          currentUserId={userId}
+          groupName={group.name}
+        />
+      </div>
 
       {/* Members Card */}
       <Card className="mb-6">
