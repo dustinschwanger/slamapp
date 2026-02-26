@@ -9,6 +9,7 @@ import {
   ScrollText,
   Video,
   HandHeart,
+  NotebookPen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ export const blockLabels: Record<LessonBlockType, string> = {
   context: "Context",
   scripture_reading: "Scripture Reading",
   teaching: "Teaching",
+  teacher_notes: "Teacher Notes",
   video: "Video",
   discussion: "Discussion",
   application: "Application",
@@ -36,6 +38,8 @@ function BlockIcon({ type }: { type: LessonBlockType }) {
       return <ScrollText className="h-5 w-5" />;
     case "scripture_reading":
       return <BookOpen className="h-5 w-5" />;
+    case "teacher_notes":
+      return <NotebookPen className="h-5 w-5" />;
     case "video":
       return <Video className="h-5 w-5" />;
     case "discussion":
@@ -64,6 +68,7 @@ export function LessonBlockRenderer({
   const isDiscussion = block.type === "discussion";
   const isApplication = block.type === "application";
   const isPrayer = block.type === "opening_prayer" || block.type === "closing_prayer";
+  const isTeacherNotes = block.type === "teacher_notes";
   const isVideo = block.type === "video";
   const embedUrl = isVideo && block.videoUrl ? getEmbedUrl(block.videoUrl) : null;
 
@@ -74,9 +79,10 @@ export function LessonBlockRenderer({
         isApplication && "bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30",
         isScripture && "bg-bg-secondary border-l-4 border-l-primary",
         isPrayer && "bg-[var(--color-prayer)]/8 border-l-4 border-l-[var(--color-prayer)]",
+        isTeacherNotes && "bg-amber-50 border-2 border-dashed border-amber-300",
         isDiscussion && "bg-bg-secondary",
         isVideo && "bg-bg-secondary",
-        !isApplication && !isScripture && !isDiscussion && !isPrayer && !isVideo && "bg-transparent"
+        !isApplication && !isScripture && !isDiscussion && !isPrayer && !isTeacherNotes && !isVideo && "bg-transparent"
       )}
     >
       {/* Block header */}
@@ -86,6 +92,11 @@ export function LessonBlockRenderer({
           <span className="text-sm font-semibold uppercase tracking-wide text-text-tertiary">
             {blockLabels[block.type]}
           </span>
+          {isTeacherNotes && (
+            <Badge className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+              For the Teacher
+            </Badge>
+          )}
           {isScripture && block.reference && (
             <Badge variant="secondary" className="ml-2">
               {block.reference}
@@ -107,7 +118,7 @@ export function LessonBlockRenderer({
               Add to Service
             </Button>
           )}
-          {block.projectable && onProject && (
+          {block.projectable && !isTeacherNotes && onProject && (
             <Button
               variant="ghost"
               size="sm"

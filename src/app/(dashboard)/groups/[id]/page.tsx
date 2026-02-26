@@ -121,7 +121,7 @@ export default function GroupDetailPage() {
       const res = await fetch("/api/super-admin/users");
       if (res.ok) {
         const data = await res.json();
-        setChurchUsers(data);
+        setChurchUsers(Array.isArray(data) ? data : data.users ?? []);
       }
     } catch {
       // Fallback: users list may not be available to non-super-admins

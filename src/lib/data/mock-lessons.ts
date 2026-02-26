@@ -1,10 +1,13 @@
 import type { LessonContent } from "@/lib/types";
 
-export const mockLessons: (LessonContent & {
+
+type MockLesson = LessonContent & {
   id: string;
   scheduledDate: string;
   isPublished: boolean;
-})[] = [
+};
+
+const johnLessons: MockLesson[] = [
   // ==================== LESSON 1 ====================
   {
     id: "1",
@@ -1534,3 +1537,5 @@ export const mockLessons: (LessonContent & {
     ],
   },
 ];
+
+export const mockLessons: MockLesson[] = [...johnLessons];

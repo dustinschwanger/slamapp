@@ -153,6 +153,7 @@ function LessonsContent() {
 
         <LessonViewer
           lesson={selectedLesson}
+          lessonId={selectedLesson.id}
           isTemplate={isTemplate}
           onUseTemplate={
             isTemplate ? () => handleDuplicate(selectedLesson.id) : undefined

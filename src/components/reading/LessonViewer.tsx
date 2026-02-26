@@ -1,6 +1,7 @@
 "use client";
 
-import { ClipboardList, Copy, Pencil } from "lucide-react";
+import { ClipboardList, Copy, Pencil, Printer } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LessonBlockRenderer } from "./LessonBlockRenderer";
@@ -8,6 +9,7 @@ import type { LessonContent, LessonBlock } from "@/lib/types";
 
 interface LessonViewerProps {
   lesson: LessonContent;
+  lessonId?: string;
   isTemplate?: boolean;
   onUseTemplate?: () => void;
   onEdit?: () => void;
@@ -18,6 +20,7 @@ interface LessonViewerProps {
 
 export function LessonViewer({
   lesson,
+  lessonId,
   isTemplate,
   onUseTemplate,
   onEdit,
@@ -82,6 +85,21 @@ export function LessonViewer({
               <Pencil className="h-4 w-4" />
               Edit Lesson
             </Button>
+          )}
+          {lessonId && (
+            <Link
+              href={`/reading/lessons/${lessonId}/print`}
+              target="_blank"
+            >
+              <Button
+                variant="outline"
+                size="default"
+                className="gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </Button>
+            </Link>
           )}
           {onAddAllBlocksToService && (
             <Button

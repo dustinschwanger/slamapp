@@ -16,6 +16,7 @@ const blockLabels: Record<LessonBlockType, string> = {
   context: "Context",
   scripture_reading: "Scripture Reading",
   teaching: "Teaching",
+  teacher_notes: "Teacher Notes",
   video: "Video",
   discussion: "Discussion",
   application: "Application",

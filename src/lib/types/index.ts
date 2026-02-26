@@ -13,6 +13,7 @@ export type LessonBlockType =
   | "context"
   | "scripture_reading"
   | "teaching"
+  | "teacher_notes"
   | "video"
   | "discussion"
   | "application"

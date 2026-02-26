@@ -17,11 +17,7 @@ function noopMiddleware(_request: NextRequest) {
 }
 
 export default hasValidClerkKey
-  ? clerkMiddleware(async (auth, request) => {
-      if (!isPublicRoute(request)) {
-        await auth.protect();
-      }
-    })
+  ? clerkMiddleware()
   : noopMiddleware;
 
 export const config = {

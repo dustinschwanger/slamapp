@@ -69,6 +69,7 @@ const BLOCK_TYPES: LessonBlockType[] = [
   "context",
   "scripture_reading",
   "teaching",
+  "teacher_notes",
   "video",
   "discussion",
   "application",
@@ -167,7 +168,7 @@ export function LessonEditor({ lessonId }: LessonEditorProps) {
         withId({
           type,
           content: "",
-          projectable: type !== "video",
+          projectable: type !== "video" && type !== "teacher_notes",
           ...(type === "scripture_reading"
             ? { reference: "", version: "KJV" }
             : {}),

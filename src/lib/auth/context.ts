@@ -19,6 +19,17 @@ export interface SuperAdminContext extends ResolvedAuth {
   isSuperAdmin: true;
 }
 
+const ANONYMOUS_CONTEXT: ResolvedAuth = {
+  userId: "anonymous",
+  clerkId: "anonymous",
+  churchId: null,
+  role: "member" as UserRole,
+  firstName: "Guest",
+  lastName: "",
+  churchName: null,
+  isSuperAdmin: false,
+};
+
 const ROLE_HIERARCHY: Record<UserRole, number> = {
   super_admin: 4,
   admin: 3,
@@ -36,7 +47,7 @@ export async function getAuthContext(): Promise<ResolvedAuth> {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
-    throw new AuthError("Not authenticated", 401);
+    return ANONYMOUS_CONTEXT;
   }
 
   const user = await db.user.findUnique({
@@ -139,6 +150,9 @@ export async function getAuthContext(): Promise<ResolvedAuth> {
 export async function requireRole(minimumRole: UserRole): Promise<ResolvedAuth> {
   const ctx = await getAuthContext();
 
+  // Anonymous users bypass role checks (open access mode)
+  if (ctx.userId === "anonymous") return ctx;
+
   if (ctx.isSuperAdmin) return ctx;
 
   if (ROLE_HIERARCHY[ctx.role] < ROLE_HIERARCHY[minimumRole]) {
@@ -156,6 +170,9 @@ export async function requireRole(minimumRole: UserRole): Promise<ResolvedAuth> 
  */
 export async function requireSuperAdmin(): Promise<SuperAdminContext> {
   const ctx = await getAuthContext();
+
+  // Anonymous users bypass super admin check (open access mode)
+  if (ctx.userId === "anonymous") return ctx as SuperAdminContext;
 
   if (!ctx.isSuperAdmin) {
     throw new AuthError("Super admin access required", 403);

@@ -213,6 +213,50 @@ body {
   * {
     border-color: #ccc !important;
   }
+
+  /* === Lesson Print Styles === */
+  .lesson-print-page {
+    font-family: 'Merriweather', 'Georgia', serif;
+  }
+
+  .lesson-print-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22pt;
+  }
+
+  .lesson-print-page .font-reading {
+    font-family: 'Merriweather', 'Georgia', serif;
+  }
+
+  .lesson-print-page .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Force background colors for teacher notes and application boxes */
+  .print-teacher-notes {
+    background-color: #fefce8 !important;
+    border-color: #fcd34d !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-application {
+    background-color: #f0f9ff !important;
+    border-color: #bae6fd !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Prevent page breaks inside lesson blocks */
+  .lesson-print-scripture,
+  .lesson-print-teacher-notes,
+  .lesson-print-discussion,
+  .lesson-print-application,
+  .lesson-print-prayer,
+  .lesson-print-teaching,
+  .lesson-print-context {
+    break-inside: avoid;
+  }
 }
 
 /* === Reduced Motion === */
