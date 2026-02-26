@@ -9,19 +9,31 @@ interface MessageBubbleProps {
   isOwnMessage: boolean;
 }
 
-function formatRelativeTime(dateString: string): string {
-  const now = new Date();
+function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
 
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  const time = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  if (isToday) return `Today at ${time}`;
+  if (isYesterday) return `Yesterday at ${time}`;
+
+  const dateStr = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+  });
+
+  return `${dateStr} at ${time}`;
 }
 
 export function MessageBubble({
@@ -72,7 +84,7 @@ export function MessageBubble({
 
         {/* Timestamp */}
         <span className="text-xs text-[var(--color-text-tertiary)] mt-1 px-1">
-          {formatRelativeTime(timestamp)}
+          {formatDateTime(timestamp)}
         </span>
       </div>
     </div>
