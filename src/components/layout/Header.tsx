@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils/cn";
 
 const hubTitles: Record<string, string> = {
@@ -63,8 +64,7 @@ export function Header() {
         </h1>
       </div>
 
-      {/* Placeholder for Clerk UserButton - will be replaced with actual auth component */}
-      <div className="h-9 w-9 rounded-full bg-bg-secondary border border-border" />
+      <UserButton afterSignOutUrl="/sign-in" />
     </header>
   );
 }
