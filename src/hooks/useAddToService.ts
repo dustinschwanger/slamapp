@@ -31,7 +31,15 @@ export function useAddToService() {
     queryFn: async () => {
       const res = await fetch("/api/services?isTemplate=false");
       if (!res.ok) throw new Error("Failed to fetch plans");
-      return res.json();
+      const data: PlanSummary[] = await res.json();
+      // Sort soonest date first; plans without a date go to the end
+      data.sort((a, b) => {
+        if (!a.serviceDate && !b.serviceDate) return 0;
+        if (!a.serviceDate) return 1;
+        if (!b.serviceDate) return -1;
+        return a.serviceDate.localeCompare(b.serviceDate);
+      });
+      return data;
     },
     enabled: isOpen,
     staleTime: 0,

@@ -27,7 +27,7 @@ const navItems = [
   { label: "Visit Guide", href: "/visit-guide", icon: MessageCircleHeart },
   { label: "Services", href: "/services", icon: ClipboardList },
   { label: "Worship", href: "/worship", icon: Music },
-  { label: "Lessons", href: "/reading", icon: BookOpen },
+  { label: "Lessons", href: "/reading/lessons", icon: BookOpen },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Prayer", href: "/prayer", icon: Heart },
   { label: "Volunteers", href: "/volunteer", icon: Calendar },

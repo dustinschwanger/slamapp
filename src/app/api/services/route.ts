@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const isTemplate = searchParams.get("isTemplate");
     const upcoming = searchParams.get("upcoming");
+    const studyPlanId = searchParams.get("studyPlanId");
 
     const where: Record<string, unknown> = {};
 
@@ -51,6 +52,10 @@ export async function GET(request: NextRequest) {
 
     if (upcoming === "true") {
       where.serviceDate = { gte: new Date() };
+    }
+
+    if (studyPlanId) {
+      where.studyPlanId = studyPlanId;
     }
 
     const plans = await db.servicePlan.findMany({

@@ -1,5 +1,39 @@
 export type UserRole = "super_admin" | "admin" | "leader" | "volunteer" | "member";
 
+// --- Lesson Metadata & Study Plan Types ---
+
+export interface LessonMeta {
+  id: string;
+  book: string;
+  lessonNumber: number;
+  priority: number;
+  themes: string[];
+  summary: string;
+}
+
+export interface StudyPlan {
+  id: string;
+  name: string;
+  book: string;
+  weekCount: number;
+  lessonIds: string[];
+  createdAt: string;
+  customPrompt?: string;
+}
+
+export interface StudyPlanSummary {
+  studyPlanId: string;
+  name: string;
+  book: string;
+  weekCount: number;
+  createdAt: string;
+  progress: {
+    draft: number;
+    ready: number;
+    completed: number;
+  };
+}
+
 export type PrayerRequestStatus = "active" | "answered" | "ongoing";
 
 export type MessageType = "text" | "prayer_share" | "image" | "system";
@@ -251,6 +285,9 @@ export interface ServicePlan {
   items: ServicePlanItem[];
   postServiceNotes?: string;
   status: ServicePlanStatus;
+  studyPlanId?: string;
+  studyPlanName?: string;
+  studyPlanWeek?: number;
   createdAt: string;
   updatedAt: string;
   // Hydrated fields

@@ -1,4 +1,5 @@
 import type { LessonContent } from "@/lib/types";
+import { matthewLessons } from "./mock-lessons-matthew";
 
 type MockLesson = LessonContent & {
   id: string;
@@ -1537,4 +1538,4 @@ const johnLessons: MockLesson[] = [
   },
 ];
 
-export const mockLessons: MockLesson[] = [...johnLessons];
+export const mockLessons: MockLesson[] = [...matthewLessons, ...johnLessons];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Calendar, FileText, Library } from "lucide-react";
+import { BookOpen, Calendar, ClipboardList, FileText, Library } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -63,6 +63,22 @@ export default function ReadingPage() {
               <CardTitle>My Lessons</CardTitle>
               <CardDescription>
                 View and manage your customized lessons.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+
+        {/* Study Plans */}
+        <Link href="/reading/study-plans" className="block group lg:col-span-2">
+          <Card className="hover:shadow-[var(--shadow-lg)] transition-shadow group-hover:-translate-y-0.5 transition-transform h-full">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-1">
+                <ClipboardList className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Study Plans</span>
+              </div>
+              <CardTitle>Study Plans</CardTitle>
+              <CardDescription>
+                Create and follow multi-week Bible study plans.
               </CardDescription>
             </CardHeader>
           </Card>

@@ -418,6 +418,9 @@ model ServicePlan {
   isTemplate       Boolean   @default(false) @map("is_template")
   postServiceNotes String?   @map("post_service_notes")
   status           String    @default("draft")
+  studyPlanId      String?   @map("study_plan_id")
+  studyPlanName    String?   @map("study_plan_name")
+  studyPlanWeek    Int?      @map("study_plan_week")
   churchId         String    @map("church_id") @db.Uuid
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")

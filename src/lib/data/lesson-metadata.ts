@@ -1,0 +1,436 @@
+import type { LessonMeta } from "@/lib/types";
+
+export const lessonMetadata: LessonMeta[] = [
+  // ===== GOSPEL OF JOHN (20 lessons, IDs 1-20) =====
+  {
+    id: "1",
+    book: "John",
+    lessonNumber: 1,
+    priority: 10,
+    themes: ["deity of Christ", "creation", "incarnation", "light"],
+    summary: "Jesus is the eternal Word made flesh, the light shining in darkness.",
+  },
+  {
+    id: "2",
+    book: "John",
+    lessonNumber: 2,
+    priority: 8,
+    themes: ["testimony", "baptism", "identity of Jesus", "lamb of God"],
+    summary: "John the Baptist testifies that Jesus is the Lamb of God.",
+  },
+  {
+    id: "3",
+    book: "John",
+    lessonNumber: 3,
+    priority: 6,
+    themes: ["calling", "discipleship", "following Jesus"],
+    summary: "Jesus calls His first disciples to come and see.",
+  },
+  {
+    id: "4",
+    book: "John",
+    lessonNumber: 4,
+    priority: 7,
+    themes: ["miracles", "faith", "glory", "provision"],
+    summary: "Jesus turns water to wine at a wedding, revealing His glory.",
+  },
+  {
+    id: "5",
+    book: "John",
+    lessonNumber: 5,
+    priority: 10,
+    themes: ["salvation", "new birth", "grace", "eternal life", "faith"],
+    summary: "Jesus teaches Nicodemus about being born again and God's love for the world.",
+  },
+  {
+    id: "6",
+    book: "John",
+    lessonNumber: 6,
+    priority: 9,
+    themes: ["living water", "worship", "outreach", "grace", "acceptance"],
+    summary: "Jesus offers living water to the Samaritan woman at the well.",
+  },
+  {
+    id: "7",
+    book: "John",
+    lessonNumber: 7,
+    priority: 7,
+    themes: ["healing", "faith", "patience", "compassion"],
+    summary: "Jesus heals a man who waited 38 years at the pool of Bethesda.",
+  },
+  {
+    id: "8",
+    book: "John",
+    lessonNumber: 8,
+    priority: 9,
+    themes: ["bread of life", "provision", "faith", "miracles", "sustenance"],
+    summary: "Jesus feeds 5,000 and declares Himself the Bread of Life.",
+  },
+  {
+    id: "9",
+    book: "John",
+    lessonNumber: 9,
+    priority: 8,
+    themes: ["light", "healing", "blindness", "spiritual sight"],
+    summary: "Jesus heals a man born blind and declares Himself the Light of the World.",
+  },
+  {
+    id: "10",
+    book: "John",
+    lessonNumber: 10,
+    priority: 9,
+    themes: ["good shepherd", "protection", "care", "comfort", "security"],
+    summary: "Jesus describes Himself as the Good Shepherd who lays down His life.",
+  },
+  {
+    id: "11",
+    book: "John",
+    lessonNumber: 11,
+    priority: 10,
+    themes: ["resurrection", "faith", "grief", "hope", "power of God"],
+    summary: "Jesus raises Lazarus from the dead, showing His power over death.",
+  },
+  {
+    id: "12",
+    book: "John",
+    lessonNumber: 12,
+    priority: 6,
+    themes: ["devotion", "worship", "sacrifice", "love"],
+    summary: "Mary anoints Jesus with costly perfume as an act of love.",
+  },
+  {
+    id: "13",
+    book: "John",
+    lessonNumber: 13,
+    priority: 8,
+    themes: ["humility", "service", "love", "servant leadership"],
+    summary: "Jesus washes His disciples' feet, modeling humble service.",
+  },
+  {
+    id: "14",
+    book: "John",
+    lessonNumber: 14,
+    priority: 9,
+    themes: ["love", "commandment", "community", "unity"],
+    summary: "Jesus gives the new commandment to love one another.",
+  },
+  {
+    id: "15",
+    book: "John",
+    lessonNumber: 15,
+    priority: 9,
+    themes: ["heaven", "comfort", "hope", "promise", "trust"],
+    summary: "Jesus promises to prepare a place and come again for His people.",
+  },
+  {
+    id: "16",
+    book: "John",
+    lessonNumber: 16,
+    priority: 8,
+    themes: ["abiding", "fruitfulness", "dependence on God", "vine"],
+    summary: "Jesus teaches about abiding in Him as branches in the True Vine.",
+  },
+  {
+    id: "17",
+    book: "John",
+    lessonNumber: 17,
+    priority: 7,
+    themes: ["Holy Spirit", "helper", "comfort", "guidance", "truth"],
+    summary: "Jesus promises the Holy Spirit as Helper and Comforter.",
+  },
+  {
+    id: "18",
+    book: "John",
+    lessonNumber: 18,
+    priority: 8,
+    themes: ["prayer", "unity", "intercession", "glory"],
+    summary: "Jesus prays for His disciples and all future believers.",
+  },
+  {
+    id: "19",
+    book: "John",
+    lessonNumber: 19,
+    priority: 10,
+    themes: ["crucifixion", "sacrifice", "atonement", "love", "suffering"],
+    summary: "Jesus goes to the cross and declares 'It is finished.'",
+  },
+  {
+    id: "20",
+    book: "John",
+    lessonNumber: 20,
+    priority: 10,
+    themes: ["resurrection", "hope", "victory", "faith", "new life"],
+    summary: "Jesus rises from the dead and appears to Mary Magdalene.",
+  },
+
+  // ===== GOSPEL OF MATTHEW (30 lessons, IDs 21-50) =====
+  {
+    id: "21",
+    book: "Matthew",
+    lessonNumber: 1,
+    priority: 8,
+    themes: ["birth of Jesus", "faithfulness", "promises", "obedience"],
+    summary: "God keeps His promise through the birth of Jesus, and Joseph obeys in faith.",
+  },
+  {
+    id: "22",
+    book: "Matthew",
+    lessonNumber: 2,
+    priority: 7,
+    themes: ["worship", "protection", "sovereignty", "wise men"],
+    summary: "Wise men worship the child Jesus, and God protects the family in Egypt.",
+  },
+  {
+    id: "23",
+    book: "Matthew",
+    lessonNumber: 3,
+    priority: 7,
+    themes: ["temptation", "Scripture", "spiritual warfare", "obedience"],
+    summary: "Jesus resists temptation with Scripture and begins His public ministry.",
+  },
+  {
+    id: "24",
+    book: "Matthew",
+    lessonNumber: 4,
+    priority: 9,
+    themes: ["beatitudes", "humility", "comfort", "mourning", "blessing"],
+    summary: "Jesus teaches that the poor in spirit and those who mourn are blessed.",
+  },
+  {
+    id: "25",
+    book: "Matthew",
+    lessonNumber: 5,
+    priority: 8,
+    themes: ["beatitudes", "meekness", "mercy", "purity", "peace"],
+    summary: "Jesus blesses the meek, merciful, pure in heart, and peacemakers.",
+  },
+  {
+    id: "26",
+    book: "Matthew",
+    lessonNumber: 6,
+    priority: 8,
+    themes: ["salt and light", "influence", "witness", "purpose"],
+    summary: "Jesus calls His followers to be salt and light in the world.",
+  },
+  {
+    id: "27",
+    book: "Matthew",
+    lessonNumber: 7,
+    priority: 10,
+    themes: ["worry", "trust", "provision", "anxiety", "peace", "faith"],
+    summary: "Jesus teaches not to worry because the Father provides for every need.",
+  },
+  {
+    id: "28",
+    book: "Matthew",
+    lessonNumber: 8,
+    priority: 8,
+    themes: ["obedience", "foundation", "wisdom", "hearing God's word"],
+    summary: "The wise builder who hears and obeys Jesus' words stands firm.",
+  },
+  {
+    id: "29",
+    book: "Matthew",
+    lessonNumber: 9,
+    priority: 7,
+    themes: ["healing", "faith", "compassion", "inclusion"],
+    summary: "Jesus heals a leper and a centurion's servant, reaching the outcast.",
+  },
+  {
+    id: "30",
+    book: "Matthew",
+    lessonNumber: 10,
+    priority: 8,
+    themes: ["storms", "faith", "fear", "power of Jesus", "trust"],
+    summary: "Jesus calms the storm, showing His power over creation.",
+  },
+  {
+    id: "31",
+    book: "Matthew",
+    lessonNumber: 11,
+    priority: 7,
+    themes: ["forgiveness", "healing", "authority", "faith"],
+    summary: "Jesus forgives and heals a paralyzed man, showing His divine authority.",
+  },
+  {
+    id: "32",
+    book: "Matthew",
+    lessonNumber: 12,
+    priority: 7,
+    themes: ["calling", "grace", "mercy", "acceptance", "sinners"],
+    summary: "Jesus calls Matthew the tax collector and eats with sinners.",
+  },
+  {
+    id: "33",
+    book: "Matthew",
+    lessonNumber: 13,
+    priority: 6,
+    themes: ["mission", "evangelism", "sending", "discipleship"],
+    summary: "Jesus sends out the twelve apostles to share the good news.",
+  },
+  {
+    id: "34",
+    book: "Matthew",
+    lessonNumber: 14,
+    priority: 10,
+    themes: ["rest", "comfort", "weariness", "peace", "gentle yoke"],
+    summary: "Jesus invites the weary to come to Him and find rest.",
+  },
+  {
+    id: "35",
+    book: "Matthew",
+    lessonNumber: 15,
+    priority: 6,
+    themes: ["sabbath", "mercy", "legalism", "compassion"],
+    summary: "Jesus teaches that mercy matters more than rigid rules.",
+  },
+  {
+    id: "36",
+    book: "Matthew",
+    lessonNumber: 16,
+    priority: 5,
+    themes: ["ministry", "weariness", "trust", "rest"],
+    summary: "Jesus equips the disciples for ministry and invites them to rest.",
+  },
+  {
+    id: "37",
+    book: "Matthew",
+    lessonNumber: 17,
+    priority: 9,
+    themes: ["parables", "hearing God's word", "growth", "soil", "receptivity"],
+    summary: "The Parable of the Sower teaches about receiving God's word.",
+  },
+  {
+    id: "38",
+    book: "Matthew",
+    lessonNumber: 18,
+    priority: 7,
+    themes: ["parables", "kingdom", "growth", "small beginnings", "faith"],
+    summary: "The mustard seed and leaven parables show God's kingdom starts small but grows.",
+  },
+  {
+    id: "39",
+    book: "Matthew",
+    lessonNumber: 19,
+    priority: 7,
+    themes: ["parables", "kingdom", "treasure", "value", "commitment"],
+    summary: "The hidden treasure and pearl teach that God's kingdom is worth everything.",
+  },
+  {
+    id: "40",
+    book: "Matthew",
+    lessonNumber: 20,
+    priority: 8,
+    themes: ["miracles", "provision", "compassion", "abundance"],
+    summary: "Jesus feeds five thousand people from five loaves and two fish.",
+  },
+  {
+    id: "41",
+    book: "Matthew",
+    lessonNumber: 21,
+    priority: 8,
+    themes: ["faith", "fear", "trust", "miracles", "keeping eyes on Jesus"],
+    summary: "Peter walks on water when he keeps his eyes on Jesus.",
+  },
+  {
+    id: "42",
+    book: "Matthew",
+    lessonNumber: 22,
+    priority: 9,
+    themes: ["identity of Jesus", "confession", "faith", "Messiah"],
+    summary: "Peter confesses Jesus as the Christ, the Son of the living God.",
+  },
+  {
+    id: "43",
+    book: "Matthew",
+    lessonNumber: 23,
+    priority: 9,
+    themes: ["forgiveness", "grace", "mercy", "parables", "reconciliation"],
+    summary: "The parable of the unforgiving servant teaches unlimited forgiveness.",
+  },
+  {
+    id: "44",
+    book: "Matthew",
+    lessonNumber: 24,
+    priority: 9,
+    themes: ["love", "commandment", "love for God", "love for neighbor"],
+    summary: "The greatest commandment: love God with all your heart and love your neighbor.",
+  },
+  {
+    id: "45",
+    book: "Matthew",
+    lessonNumber: 25,
+    priority: 7,
+    themes: ["children", "faith", "humility", "acceptance", "value"],
+    summary: "Jesus welcomes the children and teaches about childlike faith.",
+  },
+  {
+    id: "46",
+    book: "Matthew",
+    lessonNumber: 26,
+    priority: 7,
+    themes: ["parables", "grace", "generosity", "fairness", "God's goodness"],
+    summary: "The workers in the vineyard parable reveals God's generous grace.",
+  },
+  {
+    id: "47",
+    book: "Matthew",
+    lessonNumber: 27,
+    priority: 7,
+    themes: ["parables", "stewardship", "faithfulness", "responsibility"],
+    summary: "The parable of the talents teaches faithful use of what God gives.",
+  },
+  {
+    id: "48",
+    book: "Matthew",
+    lessonNumber: 28,
+    priority: 10,
+    themes: ["crucifixion", "sacrifice", "suffering", "atonement", "love"],
+    summary: "Jesus is tried and crucified, giving His life for the world.",
+  },
+  {
+    id: "49",
+    book: "Matthew",
+    lessonNumber: 29,
+    priority: 10,
+    themes: ["resurrection", "hope", "victory", "new life", "joy"],
+    summary: "Jesus rises from the dead, conquering death and giving hope.",
+  },
+  {
+    id: "50",
+    book: "Matthew",
+    lessonNumber: 30,
+    priority: 9,
+    themes: ["mission", "commission", "discipleship", "authority", "promise"],
+    summary: "Jesus sends His followers to make disciples of all nations.",
+  },
+];
+
+/** Get all unique book names from the metadata registry */
+export function getAvailableBooks(): string[] {
+  const books = new Set(lessonMetadata.map((m) => m.book));
+  return Array.from(books);
+}
+
+/** Get metadata for a specific book */
+export function getMetadataByBook(book: string): LessonMeta[] {
+  return lessonMetadata.filter((m) => m.book === book);
+}
+
+/** Get metadata for multiple books (preserves book order as given) */
+export function getMetadataByBooks(books: string[]): LessonMeta[] {
+  const bookSet = new Set(books);
+  const items = lessonMetadata.filter((m) => bookSet.has(m.book));
+  // Sort by the requested book order, then by lesson number within each book
+  return items.sort((a, b) => {
+    const bookA = books.indexOf(a.book);
+    const bookB = books.indexOf(b.book);
+    if (bookA !== bookB) return bookA - bookB;
+    return a.lessonNumber - b.lessonNumber;
+  });
+}
+
+/** Get metadata by lesson ID */
+export function getMetadataById(id: string): LessonMeta | undefined {
+  return lessonMetadata.find((m) => m.id === id);
+}
