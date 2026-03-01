@@ -297,10 +297,10 @@ export default function ServicesPage() {
         </section>
       )}
 
-      {/* Section 3: Your Service Plans (standalone) */}
+      {/* Section 3: Your Services (standalone) */}
       <section className="mb-8">
         <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-3">
-          Your Service Plans
+          Your Services
         </h3>
         {loading ? (
           <p className="text-base text-[var(--color-text-tertiary)] py-8 text-center">

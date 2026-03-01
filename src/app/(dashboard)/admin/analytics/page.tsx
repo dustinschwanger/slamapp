@@ -204,7 +204,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Pending applications banner */}
-      {data.applications.pending > 0 && (
+      {data.applications?.pending > 0 && (
         <Link href="/admin/applications">
           <div className="rounded-[var(--radius-lg)] border border-[var(--color-warning)] bg-[#B8860B10] p-4 mb-6 flex items-center gap-3">
             <Inbox className="h-5 w-5 text-[var(--color-warning)]" />
