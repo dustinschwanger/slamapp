@@ -38,8 +38,7 @@ export async function GET() {
       return {
         id: user.id,
         name: `${user.firstName} ${user.lastName}`,
-        email: isPrivileged ? user.email : undefined,
-        phone: isPrivileged ? (user.phone ?? "") : undefined,
+        ...(isPrivileged && { email: user.email, phone: user.phone ?? "" }),
         role: user.role,
         groups: user.groupMemberships.map((gm) => gm.group.name),
         initials,

@@ -52,6 +52,7 @@ export function StudyPlanBuilder({
   const [aiPrompt, setAiPrompt] = React.useState("");
   const [aiLoading, setAiLoading] = React.useState(false);
   const [aiReasoning, setAiReasoning] = React.useState("");
+  const [aiError, setAiError] = React.useState("");
   const [planName, setPlanName] = React.useState("");
   const [startDate, setStartDate] = React.useState("");
   const dialogRef = React.useRef<HTMLDialogElement>(null);
@@ -131,6 +132,7 @@ export function StudyPlanBuilder({
     if (!aiPrompt.trim()) return;
     setAiLoading(true);
     setAiReasoning("");
+    setAiError("");
     try {
       const res = await fetch("/api/study-plans/suggest", {
         method: "POST",
@@ -143,11 +145,11 @@ export function StudyPlanBuilder({
       });
 
       if (!res.ok) {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (res.status === 503) {
-          toast.error("AI suggestions are not configured. Using priority-based selection.");
+          setAiError("AI suggestions are not configured yet. You can still select lessons manually below.");
         } else {
-          toast.error(data.error || "AI suggestion failed");
+          setAiError(data.error || "AI suggestion failed. Please try again.");
         }
         return;
       }
@@ -155,11 +157,10 @@ export function StudyPlanBuilder({
       const data = await res.json();
       if (data.lessonIds?.length > 0) {
         setSelectedIds(data.lessonIds);
-        setAiReasoning(data.reasoning || "");
-        toast.success("AI updated the lesson selection");
+        setAiReasoning(data.reasoning || "Selection updated based on your request.");
       }
     } catch {
-      toast.error("Failed to get AI suggestions");
+      setAiError("Could not reach the AI service. You can still select lessons manually below.");
     } finally {
       setAiLoading(false);
     }
@@ -423,7 +424,10 @@ export function StudyPlanBuilder({
                   <Input
                     placeholder='e.g. "Focus on parables" or "Emphasize healing miracles"'
                     value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
+                    onChange={(e) => {
+                      setAiPrompt(e.target.value);
+                      if (aiError) setAiError("");
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !aiLoading) handleAiSuggest();
                     }}
@@ -446,6 +450,11 @@ export function StudyPlanBuilder({
                 {aiReasoning && (
                   <p className="mt-2 text-sm text-text-secondary italic">
                     {aiReasoning}
+                  </p>
+                )}
+                {aiError && (
+                  <p className="mt-2 text-sm text-[var(--color-error)]">
+                    {aiError}
                   </p>
                 )}
               </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { servicePlanItemsArraySchema } from "@/lib/validations";
 
 export async function POST(
   request: NextRequest,
@@ -13,9 +14,10 @@ export async function POST(
     const body = await request.json();
     const { items } = body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    const parsed = servicePlanItemsArraySchema.safeParse(items);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "items array is required and must not be empty" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
@@ -47,31 +49,22 @@ export async function POST(
     });
     const startPosition = (maxResult._max.position ?? -1) + 1;
 
+    const validatedItems = parsed.data;
+
     await db.servicePlanItem.createMany({
-      data: items.map(
-        (
-          item: {
-            type: string;
-            title: string;
-            notes?: string;
-            estimatedDurationSeconds?: number;
-            itemData?: unknown;
-          },
-          index: number
-        ) => ({
-          servicePlanId: id,
-          position: startPosition + index,
-          type: item.type,
-          title: item.title,
-          notes: item.notes ?? null,
-          estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
-          itemData: item.itemData ?? {},
-        })
-      ),
+      data: validatedItems.map((item, index) => ({
+        servicePlanId: id,
+        position: startPosition + index,
+        type: item.type,
+        title: item.title,
+        notes: item.notes ?? null,
+        estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
+        itemData: (item.itemData ?? {}) as object,
+      })),
     });
 
     return NextResponse.json({
-      added: items.length,
+      added: validatedItems.length,
       planId: plan.id,
       planName: plan.name,
     });

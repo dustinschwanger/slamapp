@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { getChapter } from "@/lib/bible/api";
 import type { BibleChapter } from "@/lib/bible/types";
 import type { ServicePlanItem, ScriptureItemData } from "@/lib/types";
@@ -91,7 +92,7 @@ export function RunnerScriptureContent({
       {/* Scripture content */}
       <div
         className="font-reading text-xl leading-[1.8] text-[var(--color-text-primary)] scripture-content"
-        dangerouslySetInnerHTML={{ __html: chapter.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(chapter.content) }}
       />
     </div>
   );

@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAuthContext, requireRole } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
+import { servicePlanItemSchema } from "@/lib/validations";
+
+const createServicePlanSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().max(2000).nullable().optional(),
+  serviceDate: z.string().nullable().optional(),
+  communityId: z.string().uuid().nullable().optional(),
+  roomId: z.string().uuid().nullable().optional(),
+  groupId: z.string().uuid().nullable().optional(),
+  isTemplate: z.boolean().optional(),
+  status: z.enum(["draft", "ready", "completed"]).optional(),
+  items: z.array(servicePlanItemSchema).max(100).optional(),
+});
 
 const planInclude = {
   items: {
@@ -74,14 +88,16 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireRole("leader");
     const body = await request.json();
-    const { items } = body;
 
-    if (!body.name) {
+    const parsed = createServicePlanSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Name is required" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
+
+    const data = parsed.data;
 
     if (!auth.churchId) {
       return NextResponse.json(
@@ -90,18 +106,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Whitelist allowed fields to prevent mass assignment
     const planData = {
-      name: body.name as string,
+      name: data.name,
       churchId: auth.churchId,
       createdById: auth.userId,
-      description: (body.description as string | undefined) ?? null,
-      serviceDate: body.serviceDate ? new Date(body.serviceDate) : null,
-      communityId: (body.communityId as string | undefined) ?? null,
-      roomId: (body.roomId as string | undefined) ?? null,
-      groupId: (body.groupId as string | undefined) ?? null,
-      isTemplate: (body.isTemplate as boolean | undefined) ?? false,
-      status: (body.status as string | undefined) ?? "draft",
+      description: data.description ?? null,
+      serviceDate: data.serviceDate ? new Date(data.serviceDate) : null,
+      communityId: data.communityId ?? null,
+      roomId: data.roomId ?? null,
+      groupId: data.groupId ?? null,
+      isTemplate: data.isTemplate ?? false,
+      status: data.status ?? "draft",
     };
 
     const plan = await db.$transaction(async (tx) => {
@@ -109,29 +124,17 @@ export async function POST(request: NextRequest) {
         data: planData,
       });
 
-      if (items && Array.isArray(items) && items.length > 0) {
+      if (data.items && data.items.length > 0) {
         await tx.servicePlanItem.createMany({
-          data: items.map(
-            (
-              item: {
-                type: string;
-                title: string;
-                position: number;
-                notes?: string;
-                estimatedDurationSeconds?: number;
-                itemData?: unknown;
-              },
-              index: number
-            ) => ({
-              servicePlanId: created.id,
-              position: item.position ?? index,
-              type: item.type,
-              title: item.title,
-              notes: item.notes ?? null,
-              estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
-              itemData: item.itemData ?? {},
-            })
-          ),
+          data: data.items.map((item, index) => ({
+            servicePlanId: created.id,
+            position: item.position ?? index,
+            type: item.type,
+            title: item.title,
+            notes: item.notes ?? null,
+            estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
+            itemData: (item.itemData ?? {}) as object,
+          })),
         });
       }
 

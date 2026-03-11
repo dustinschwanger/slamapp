@@ -4,6 +4,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, BookOpen, Loader2, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { getBooks, getChapters, getChapter } from "@/lib/bible/api";
 import type { BibleBook, BibleChapter } from "@/lib/bible/types";
 
@@ -282,7 +283,7 @@ export function BibleReader({
             </h2>
             <div
               className="font-reading leading-relaxed text-lg text-text-primary bible-content"
-              dangerouslySetInnerHTML={{ __html: currentChapter.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(currentChapter.content) }}
             />
           </div>
         )}

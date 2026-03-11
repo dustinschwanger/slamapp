@@ -5,6 +5,7 @@ const API_BASE = "https://api.scripture.api.bible/v1";
 // Server-side cache for Bible API responses (KJV is public domain, safe to cache long)
 const serverCache = new Map<string, { data: string; timestamp: number }>();
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const MAX_CACHE_ENTRIES = 500;
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +14,7 @@ export async function GET(
   const apiKey = process.env.BIBLE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "not_configured", message: "Bible API key not configured. Set BIBLE_API_KEY in .env.local with a key from api.scripture.api.bible." },
+      { error: "not_configured", message: "Bible reader is currently unavailable" },
       { status: 503 }
     );
   }
@@ -50,7 +51,11 @@ export async function GET(
 
     const text = await res.text();
 
-    // Cache the response
+    // Cache the response (evict oldest entry if at capacity)
+    if (serverCache.size >= MAX_CACHE_ENTRIES && !serverCache.has(cacheKey)) {
+      const oldest = serverCache.keys().next().value;
+      if (oldest !== undefined) serverCache.delete(oldest);
+    }
     serverCache.set(cacheKey, { data: text, timestamp: Date.now() });
 
     return new NextResponse(text, {

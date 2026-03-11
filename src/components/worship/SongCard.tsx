@@ -18,6 +18,7 @@ export function SongCard({ song, onPlay, onClick, onAddToService, className }: S
     <div
       role="button"
       tabIndex={0}
+      aria-label={`View ${song.title} details`}
       onClick={() => onClick?.(song)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -26,7 +27,7 @@ export function SongCard({ song, onPlay, onClick, onAddToService, className }: S
         }
       }}
       className={cn(
-        "flex items-center gap-4 p-4 bg-[var(--color-bg-card)] rounded-[var(--radius-lg)] border border-[var(--color-border)] border-l-4 border-l-[var(--color-worship)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-[var(--duration-normal)] cursor-pointer",
+        "flex items-center gap-4 p-4 bg-[var(--color-bg-card)] rounded-[var(--radius-lg)] border border-[var(--color-border)] border-l-4 border-l-[var(--color-worship)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow duration-[var(--duration-normal)] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D5A8E]",
         className
       )}
     >

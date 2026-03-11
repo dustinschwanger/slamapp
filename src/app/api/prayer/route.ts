@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAuthContext } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
+
+const createPrayerRequestSchema = z.object({
+  requesterName: z.string().max(200).optional(),
+  requestText: z.string().min(10, "Prayer request text is required (min 10 characters)").max(2000),
+  communityId: z.string().uuid().optional(),
+  isAnonymous: z.boolean().optional(),
+  isUrgent: z.boolean().optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,21 +100,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { requesterName, requestText, communityId, isAnonymous, isUrgent } =
-      body;
+    const parsed = createPrayerRequestSchema.safeParse(body);
 
-    if (!requestText || requestText.length < 10) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Prayer request text is required (min 10 characters)" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
 
+    const data = parsed.data;
+
     // Look up the community to get a room if needed
     let roomId: string | null = null;
-    if (communityId) {
+    if (data.communityId) {
       const community = await db.community.findUnique({
-        where: { id: communityId },
+        where: { id: data.communityId },
         select: { churchId: true },
       });
       if (!community || community.churchId !== auth.churchId) {
@@ -118,13 +128,13 @@ export async function POST(request: NextRequest) {
 
     const created = await db.prayerRequest.create({
       data: {
-        requesterName: isAnonymous
+        requesterName: data.isAnonymous
           ? "Anonymous"
-          : requesterName || auth.firstName,
-        requestText,
+          : data.requesterName || auth.firstName,
+        requestText: data.requestText,
         roomId,
-        status: isUrgent ? "urgent" : "active",
-        isAnonymous: isAnonymous ?? false,
+        status: data.isUrgent ? "urgent" : "active",
+        isAnonymous: data.isAnonymous ?? false,
         requestedById: auth.userId,
         churchId: auth.churchId,
       },

@@ -6,6 +6,14 @@ import { mockLessons } from "@/lib/data/mock-lessons";
 import { getMetadataById } from "@/lib/data/lesson-metadata";
 import { BLOCK_TYPE_LABELS, BLOCK_DURATIONS } from "@/lib/constants/lessons";
 import type { LessonBlockType } from "@/lib/types";
+import { z } from "zod";
+
+const createStudyPlanSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  book: z.string().max(100).optional(),
+  lessonIds: z.array(z.string().min(1).max(100)).min(1, "At least one lesson is required").max(52),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD").optional(),
+});
 
 /**
  * GET /api/study-plans
@@ -97,19 +105,16 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireRole("leader");
     const body = await request.json();
-    const { name, book, lessonIds, startDate } = body as {
-      name: string;
-      book: string;
-      lessonIds: string[];
-      startDate?: string;
-    };
 
-    if (!name || !lessonIds?.length) {
+    const parsed = createStudyPlanSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "name and lessonIds are required" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
+
+    const { name, lessonIds, startDate } = parsed.data;
 
     if (!auth.churchId) {
       return NextResponse.json(

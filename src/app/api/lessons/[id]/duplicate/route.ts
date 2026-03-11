@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { mockLessons } from "@/lib/data/mock-lessons";
 import { db } from "@/lib/db";
 import { getAuthContext } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import type { LessonContent } from "@/lib/types";
 
 
 export async function POST(
@@ -26,8 +28,7 @@ export async function POST(
     let sourceSubtitle: string;
     let sourceScriptureRef: string;
     let sourceScriptureVersion: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let sourceContent: any;
+    let sourceContent: LessonContent;
     let sourceDiscussionQuestions: string[];
     let sourceTags: string[];
 
@@ -54,15 +55,14 @@ export async function POST(
       const dbLesson = await db.lesson.findUnique({ where: { id } });
       if (
         !dbLesson ||
-        (auth.churchId && dbLesson.churchId && dbLesson.churchId !== auth.churchId)
+        (!auth.isSuperAdmin && dbLesson.churchId && dbLesson.churchId !== auth.churchId)
       ) {
         return NextResponse.json(
           { error: "Source lesson not found" },
           { status: 404 }
         );
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const dbContent = dbLesson.content as any;
+      const dbContent = dbLesson.content as unknown as LessonContent;
       sourceTitle = dbLesson.title;
       sourceSubtitle = dbLesson.subtitle ?? "";
       sourceScriptureRef = dbLesson.scriptureReference;
@@ -82,7 +82,7 @@ export async function POST(
         subtitle: sourceSubtitle,
         scriptureReference: sourceScriptureRef,
         scriptureVersion: sourceScriptureVersion,
-        content: sourceContent,
+        content: sourceContent as unknown as Prisma.InputJsonValue,
         discussionQuestions: sourceDiscussionQuestions,
         tags: sourceTags,
         createdById: auth.userId,
@@ -98,8 +98,7 @@ export async function POST(
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const createdContent = created.content as any;
+    const createdContent = created.content as unknown as LessonContent;
     return NextResponse.json(
       {
         id: created.id,

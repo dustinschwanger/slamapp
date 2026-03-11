@@ -1,25 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { LessonMeta } from "@/lib/types";
+import { requireRole } from "@/lib/auth/context";
+import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
+
+const lessonMetaSchema = z.object({
+  id: z.string().min(1).max(100),
+  book: z.string().min(1).max(100),
+  lessonNumber: z.number().int().min(1),
+  priority: z.number().int().min(1).max(10),
+  themes: z.array(z.string().max(100)).max(20),
+  summary: z.string().max(500),
+});
+
+const suggestSchema = z.object({
+  metadata: z.array(lessonMetaSchema).min(1).max(200),
+  weekCount: z.number().int().min(1).max(52),
+  customPrompt: z.string().max(1000).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      metadata,
-      weekCount,
-      customPrompt,
-    }: {
-      metadata: LessonMeta[];
-      weekCount: number;
-      customPrompt?: string;
-    } = body;
+    await requireRole("leader");
 
-    if (!metadata || !weekCount) {
+    const body = await request.json();
+    const inputParsed = suggestSchema.safeParse(body);
+
+    if (!inputParsed.success) {
       return NextResponse.json(
-        { error: "metadata and weekCount are required" },
+        { error: inputParsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
+
+    const { metadata, weekCount, customPrompt } = inputParsed.data;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -74,8 +87,7 @@ ${metadataSummary}`;
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Anthropic API error:", errorText);
+      console.error("Anthropic API error:", response.status);
       return NextResponse.json(
         { error: "AI suggestion failed" },
         { status: 502 }
@@ -93,12 +105,12 @@ ${metadataSummary}`;
     }
 
     // Parse the JSON from the response (handle markdown code blocks)
-    let parsed;
+    let aiResult;
     try {
       const jsonStr = content.replace(/```json?\s*\n?/g, "").replace(/```\s*$/g, "").trim();
-      parsed = JSON.parse(jsonStr);
+      aiResult = JSON.parse(jsonStr);
     } catch {
-      console.error("Failed to parse AI response:", content);
+      console.error("Failed to parse AI suggestion response");
       return NextResponse.json(
         { error: "Could not parse AI response" },
         { status: 502 }
@@ -107,19 +119,15 @@ ${metadataSummary}`;
 
     // Validate that all returned IDs exist in the metadata
     const validIds = new Set(metadata.map((m) => m.id));
-    const lessonIds = (parsed.lessonIds as string[]).filter((id) =>
+    const lessonIds = (aiResult.lessonIds as string[]).filter((id) =>
       validIds.has(id)
     );
 
     return NextResponse.json({
       lessonIds,
-      reasoning: parsed.reasoning || "",
+      reasoning: aiResult.reasoning || "",
     });
   } catch (error) {
-    console.error("Study plan suggest error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

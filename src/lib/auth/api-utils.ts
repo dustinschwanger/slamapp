@@ -18,6 +18,13 @@ export function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  const message = error instanceof Error ? error.message : "Unknown error";
+  console.error("[API Error]", error);
+
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "An unexpected error occurred"
+      : error instanceof Error
+        ? error.message
+        : "Unknown error";
   return NextResponse.json({ error: message }, { status: 500 });
 }

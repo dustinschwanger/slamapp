@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Loader2, AlertCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import type { LessonContent, LessonBlock } from "@/lib/types";
 
 interface LessonWithId extends LessonContent {
@@ -36,7 +37,7 @@ function ScriptureBlock({ block }: { block: LessonBlock }) {
       <div className="border-l-4 border-[var(--color-primary)] pl-5 py-1">
         <div
           className="font-reading text-lg leading-[1.8] italic text-[var(--color-text-primary)]"
-          dangerouslySetInnerHTML={{ __html: block.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
         />
       </div>
     </div>
@@ -51,7 +52,7 @@ function TeacherNotesBlock({ block }: { block: LessonBlock }) {
       </p>
       <div
         className="font-reading text-base leading-[1.7] text-[var(--color-text-primary)]"
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
       />
     </div>
   );
@@ -92,7 +93,7 @@ function ApplicationBlock({ block }: { block: LessonBlock }) {
       </p>
       <div
         className="font-reading text-lg leading-[1.7] text-[var(--color-text-primary)]"
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
       />
     </div>
   );
@@ -106,7 +107,7 @@ function PrayerBlock({ block, label }: { block: LessonBlock; label: string }) {
       </p>
       <div
         className="font-reading text-lg leading-[1.7] italic text-[var(--color-text-primary)]"
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
       />
     </div>
   );
@@ -117,7 +118,7 @@ function TeachingBlock({ block }: { block: LessonBlock }) {
     <div className="lesson-print-teaching my-6">
       <div
         className="font-reading text-lg leading-[1.8] text-[var(--color-text-primary)]"
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
       />
     </div>
   );
@@ -131,7 +132,7 @@ function ContextBlock({ block }: { block: LessonBlock }) {
       </p>
       <div
         className="font-reading text-lg leading-[1.7] text-[var(--color-text-secondary)]"
-        dangerouslySetInnerHTML={{ __html: block.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
       />
     </div>
   );
@@ -166,7 +167,7 @@ function LessonBlockPrint({
         <div className="my-6">
           <div
             className="font-reading text-lg leading-[1.7] text-[var(--color-text-primary)]"
-            dangerouslySetInnerHTML={{ __html: block.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
           />
         </div>
       );

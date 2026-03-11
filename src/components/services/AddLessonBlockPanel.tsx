@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { GraduationCap, ChevronDown, ChevronRight, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { stripHtml } from "@/lib/utils/sanitize";
 import { Button } from "@/components/ui/button";
 import { BLOCK_TYPE_LABELS, BLOCK_DURATIONS } from "@/lib/constants/lessons";
 import type { ServicePlanItem, LessonContent } from "@/lib/types";
@@ -17,10 +18,6 @@ interface AddLessonBlockPanelProps {
   onAddItem: (item: Omit<ServicePlanItem, "id" | "position">) => void;
   lessons: LessonWithMeta[];
   existingItems?: ServicePlanItem[];
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "");
 }
 
 export function AddLessonBlockPanel({ onAddItem, lessons, existingItems = [] }: AddLessonBlockPanelProps) {
@@ -95,6 +92,7 @@ export function AddLessonBlockPanel({ onAddItem, lessons, existingItems = [] }: 
             <div
               role="button"
               tabIndex={0}
+              aria-label={`${isExpanded ? "Collapse" : "Expand"} lesson: ${lesson.title}`}
               onClick={() =>
                 setExpandedLessonId(isExpanded ? null : lesson.id)
               }
@@ -104,7 +102,7 @@ export function AddLessonBlockPanel({ onAddItem, lessons, existingItems = [] }: 
                   setExpandedLessonId(isExpanded ? null : lesson.id);
                 }
               }}
-              className="flex items-center gap-3 w-full p-3 min-h-[48px] hover:bg-[var(--color-bg-surface)] transition-colors text-left cursor-pointer"
+              className="flex items-center gap-3 w-full p-3 min-h-[48px] hover:bg-[var(--color-bg-surface)] transition-colors text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D5A8E]"
             >
               <div className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] bg-[color:rgb(8_145_178_/_0.1)] shrink-0">
                 <GraduationCap className="w-4 h-4 text-[#0891B2]" />
@@ -153,6 +151,7 @@ export function AddLessonBlockPanel({ onAddItem, lessons, existingItems = [] }: 
                       key={blockIndex}
                       role="button"
                       tabIndex={0}
+                      aria-label={`Add ${BLOCK_TYPE_LABELS[block.type]} block from ${lesson.title}`}
                       onClick={() => addBlock(lesson.id, blockIndex)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -160,7 +159,7 @@ export function AddLessonBlockPanel({ onAddItem, lessons, existingItems = [] }: 
                           addBlock(lesson.id, blockIndex);
                         }
                       }}
-                      className="flex items-start gap-3 p-2.5 min-h-[48px] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-surface)] transition-colors text-left cursor-pointer"
+                      className="flex items-start gap-3 p-2.5 min-h-[48px] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-surface)] transition-colors text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D5A8E]"
                     >
                       <Plus className="w-4 h-4 text-[#0891B2] shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">

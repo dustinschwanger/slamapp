@@ -30,7 +30,7 @@ export async function GET(
 
     if (
       !dbLesson ||
-      (auth.churchId && dbLesson.churchId && dbLesson.churchId !== auth.churchId)
+      (!auth.isSuperAdmin && dbLesson.churchId && dbLesson.churchId !== auth.churchId)
     ) {
       return NextResponse.json(
         { error: "Lesson not found" },
@@ -74,7 +74,7 @@ export async function PUT(
     const existing = await db.lesson.findUnique({ where: { id } });
     if (
       !existing ||
-      (auth.churchId && existing.churchId && existing.churchId !== auth.churchId)
+      (!auth.isSuperAdmin && existing.churchId && existing.churchId !== auth.churchId)
     ) {
       return NextResponse.json(
         { error: "Lesson not found in database. Templates cannot be edited directly." },
@@ -164,7 +164,7 @@ export async function DELETE(
     const existing = await db.lesson.findUnique({ where: { id } });
     if (
       !existing ||
-      (auth.churchId && existing.churchId && existing.churchId !== auth.churchId)
+      (!auth.isSuperAdmin && existing.churchId && existing.churchId !== auth.churchId)
     ) {
       return NextResponse.json(
         { error: "Lesson not found" },

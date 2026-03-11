@@ -7,6 +7,7 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { MusicPlayer } from "@/components/worship/MusicPlayer";
 import { LyricsDisplay } from "@/components/worship/LyricsDisplay";
 import { LyricsProjection } from "@/components/worship/LyricsProjection";
+import { ProjectionErrorBoundary } from "@/components/ui/ProjectionErrorBoundary";
 import { PlaylistBuilder } from "@/components/worship/PlaylistBuilder";
 import { SheetMusicView } from "@/components/worship/SheetMusicView";
 import { cn } from "@/lib/utils/cn";
@@ -196,11 +197,13 @@ function PlayerContent() {
       {/* Lyrics projection overlay */}
       {showProjection && currentLyrics.length > 0 && (
         <div className="fixed inset-0 z-[100]">
-          <LyricsProjection
-            lyrics={currentLyrics}
-            songTitle={player.currentSong?.title}
-            onClose={() => setShowProjection(false)}
-          />
+          <ProjectionErrorBoundary onClose={() => setShowProjection(false)}>
+            <LyricsProjection
+              lyrics={currentLyrics}
+              songTitle={player.currentSong?.title}
+              onClose={() => setShowProjection(false)}
+            />
+          </ProjectionErrorBoundary>
         </div>
       )}
     </div>

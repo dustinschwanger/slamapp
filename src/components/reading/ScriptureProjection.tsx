@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, X, Maximize, Minimize } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import type { BibleChapter } from "@/lib/bible/types";
 
 interface ScriptureProjectionProps {
@@ -17,7 +18,7 @@ interface ScriptureProjectionProps {
 function parseVersesFromHtml(html: string): string[] {
   // Create a temporary container to parse HTML
   const div = document.createElement("div");
-  div.innerHTML = html;
+  div.innerHTML = sanitizeHtml(html);
 
   // Extract text, splitting on verse number spans
   const text = div.textContent || div.innerText || "";

@@ -79,6 +79,7 @@ export function LyricsDisplay({
           ref={(el) => { sectionRefs.current[index] = el; }}
           role="button"
           tabIndex={0}
+          aria-label={`Select ${sectionLabel(section)}`}
           onClick={() => handleSectionClick(index)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -87,7 +88,7 @@ export function LyricsDisplay({
             }
           }}
           className={cn(
-            "p-4 rounded-[var(--radius-md)] cursor-pointer transition-opacity duration-[var(--duration-slow)]",
+            "p-4 rounded-[var(--radius-md)] cursor-pointer transition-opacity duration-[var(--duration-slow)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D5A8E]",
             index === currentSection
               ? "opacity-100 bg-[var(--color-bg-surface)]"
               : "opacity-60 hover:opacity-80"

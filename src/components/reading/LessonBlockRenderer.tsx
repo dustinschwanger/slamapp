@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 import { getEmbedUrl } from "@/lib/utils/video";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import type { LessonBlock, LessonBlockType } from "@/lib/types";
 
 export const blockLabels: Record<LessonBlockType, string> = {
@@ -150,7 +151,7 @@ export function LessonBlockRenderer({
       {block.content && (
         <div
           className="prose prose-base max-w-none font-reading leading-relaxed text-lg text-text-primary"
-          dangerouslySetInnerHTML={{ __html: block.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
         />
       )}
     </div>

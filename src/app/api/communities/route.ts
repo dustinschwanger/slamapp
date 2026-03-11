@@ -5,14 +5,14 @@ import { handleApiError } from "@/lib/auth/api-utils";
 import { z } from "zod";
 
 const createCommunitySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1, "Address is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  zip: z.string().min(1, "ZIP code is required"),
-  contactName: z.string().optional(),
-  contactPhone: z.string().optional(),
-  notes: z.string().optional(),
+  name: z.string().min(1, "Name is required").max(200),
+  address: z.string().min(1, "Address is required").max(500),
+  city: z.string().min(1, "City is required").max(100),
+  state: z.string().min(2, "State is required").max(2, "State must be a 2-letter code"),
+  zip: z.string().regex(/^\d{5}(-\d{4})?$/, "ZIP code must be in format 12345 or 12345-6789"),
+  contactName: z.string().max(200).optional(),
+  contactPhone: z.string().max(20).optional(),
+  notes: z.string().max(2000).optional(),
 });
 
 export async function GET() {

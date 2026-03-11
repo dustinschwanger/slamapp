@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BibleReader } from "@/components/reading/BibleReader";
 import { ScriptureProjection } from "@/components/reading/ScriptureProjection";
 import { LessonProjection } from "@/components/reading/LessonProjection";
+import { ProjectionErrorBoundary } from "@/components/ui/ProjectionErrorBoundary";
 import type { LessonContent } from "@/lib/types";
 import type { BibleChapter } from "@/lib/bible/types";
 
@@ -83,10 +84,12 @@ function ProjectContent() {
           />
         </div>
         {projectedChapter && (
-          <ScriptureProjection
-            chapter={projectedChapter}
-            onClose={() => setProjectedChapter(null)}
-          />
+          <ProjectionErrorBoundary onClose={() => setProjectedChapter(null)}>
+            <ScriptureProjection
+              chapter={projectedChapter}
+              onClose={() => setProjectedChapter(null)}
+            />
+          </ProjectionErrorBoundary>
         )}
       </div>
     );
@@ -94,7 +97,7 @@ function ProjectContent() {
 
   if (mode === "lesson" && projectedLesson) {
     return (
-      <>
+      <ProjectionErrorBoundary onClose={() => { setMode("choose"); setProjectedLessonId(null); }}>
         <LessonProjection
           blocks={projectedLesson.blocks}
           onClose={() => {
@@ -102,7 +105,7 @@ function ProjectContent() {
             setProjectedLessonId(null);
           }}
         />
-      </>
+      </ProjectionErrorBoundary>
     );
   }
 

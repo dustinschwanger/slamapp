@@ -3,8 +3,14 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
 
-const VALID_ROLES = ["admin", "leader", "volunteer", "member"] as const;
+const inviteSchema = z.object({
+  email: z.string().email("Invalid email address").max(254),
+  firstName: z.string().min(1, "First name is required").max(100),
+  lastName: z.string().min(1, "Last name is required").max(100),
+  role: z.enum(["admin", "leader", "volunteer", "member"]),
+});
 
 export async function POST(req: Request) {
   try {
@@ -18,21 +24,16 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { email, firstName, lastName, role } = body;
+    const parsed = inviteSchema.safeParse(body);
 
-    if (!email || !firstName || !lastName || !role) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "email, firstName, lastName, and role are required" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
 
-    if (!VALID_ROLES.includes(role)) {
-      return NextResponse.json(
-        { error: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` },
-        { status: 400 }
-      );
-    }
+    const { email, firstName, lastName, role } = parsed.data;
 
     // Check if user with that email already exists
     const existing = await db.user.findUnique({ where: { email } });

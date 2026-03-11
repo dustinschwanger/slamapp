@@ -13,6 +13,12 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 function noopMiddleware(_request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "Authentication service unavailable" },
+      { status: 503 }
+    );
+  }
   return NextResponse.next();
 }
 

@@ -6,6 +6,8 @@ interface CacheEntry<T> {
 // 30-day TTL for KJV (public domain, content never changes)
 const DEFAULT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
+const MAX_CACHE_ENTRIES = 500;
+
 const cache = new Map<string, CacheEntry<unknown>>();
 
 export function getCached<T>(key: string, ttlMs: number = DEFAULT_TTL_MS): T | null {
@@ -22,6 +24,10 @@ export function getCached<T>(key: string, ttlMs: number = DEFAULT_TTL_MS): T | n
 }
 
 export function setCache<T>(key: string, data: T): void {
+  if (cache.size >= MAX_CACHE_ENTRIES && !cache.has(key)) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
   cache.set(key, { data, timestamp: Date.now() });
 }
 

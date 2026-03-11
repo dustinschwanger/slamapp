@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Loader2, AlertCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 import type {
   ServicePlan,
   ServicePlanItem,
@@ -103,7 +104,7 @@ function ItemContent({ item, lessons }: { item: ServicePlanItem; lessons: Lesson
           {block.content && (
             <div
               className="text-sm text-[var(--color-text-secondary)] prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: block.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }}
             />
           )}
         </div>

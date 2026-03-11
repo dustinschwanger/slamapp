@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAuthContext, requireRole } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
+import { servicePlanItemSchema } from "@/lib/validations";
+
+const updateServicePlanSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  serviceDate: z.string().nullable().optional(),
+  communityId: z.string().uuid().nullable().optional(),
+  roomId: z.string().uuid().nullable().optional(),
+  groupId: z.string().uuid().nullable().optional(),
+  isTemplate: z.boolean().optional(),
+  postServiceNotes: z.string().max(5000).nullable().optional(),
+  status: z.enum(["draft", "ready", "completed"]).optional(),
+  items: z.array(servicePlanItemSchema).max(100).optional(),
+});
 
 const planInclude = {
   items: {
@@ -63,7 +78,16 @@ export async function PUT(
     const { id } = await params;
     const auth = await requireRole("leader");
     const body = await request.json();
-    const { items } = body;
+
+    const parsed = updateServicePlanSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
+        { status: 400 }
+      );
+    }
+
+    const data = parsed.data;
 
     const existing = await db.servicePlan.findUnique({ where: { id } });
     if (!existing) {
@@ -83,15 +107,15 @@ export async function PUT(
 
     // Whitelist allowed fields to prevent mass assignment
     const updateData: Record<string, unknown> = {};
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.serviceDate !== undefined) updateData.serviceDate = body.serviceDate ? new Date(body.serviceDate) : null;
-    if (body.communityId !== undefined) updateData.communityId = body.communityId;
-    if (body.roomId !== undefined) updateData.roomId = body.roomId;
-    if (body.groupId !== undefined) updateData.groupId = body.groupId;
-    if (body.isTemplate !== undefined) updateData.isTemplate = body.isTemplate;
-    if (body.postServiceNotes !== undefined) updateData.postServiceNotes = body.postServiceNotes;
-    if (body.status !== undefined) updateData.status = body.status;
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.serviceDate !== undefined) updateData.serviceDate = data.serviceDate ? new Date(data.serviceDate) : null;
+    if (data.communityId !== undefined) updateData.communityId = data.communityId;
+    if (data.roomId !== undefined) updateData.roomId = data.roomId;
+    if (data.groupId !== undefined) updateData.groupId = data.groupId;
+    if (data.isTemplate !== undefined) updateData.isTemplate = data.isTemplate;
+    if (data.postServiceNotes !== undefined) updateData.postServiceNotes = data.postServiceNotes;
+    if (data.status !== undefined) updateData.status = data.status;
 
     const plan = await db.$transaction(async (tx) => {
       await tx.servicePlan.update({
@@ -99,34 +123,22 @@ export async function PUT(
         data: updateData,
       });
 
-      if (items && Array.isArray(items)) {
+      if (data.items !== undefined) {
         await tx.servicePlanItem.deleteMany({
           where: { servicePlanId: id },
         });
 
-        if (items.length > 0) {
+        if (data.items.length > 0) {
           await tx.servicePlanItem.createMany({
-            data: items.map(
-              (
-                item: {
-                  type: string;
-                  title: string;
-                  position: number;
-                  notes?: string;
-                  estimatedDurationSeconds?: number;
-                  itemData?: unknown;
-                },
-                index: number
-              ) => ({
-                servicePlanId: id,
-                position: item.position ?? index,
-                type: item.type,
-                title: item.title,
-                notes: item.notes ?? null,
-                estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
-                itemData: item.itemData ?? {},
-              })
-            ),
+            data: data.items.map((item, index) => ({
+              servicePlanId: id,
+              position: item.position ?? index,
+              type: item.type,
+              title: item.title,
+              notes: item.notes ?? null,
+              estimatedDurationSeconds: item.estimatedDurationSeconds ?? 180,
+              itemData: (item.itemData ?? {}) as object,
+            })),
           });
         }
       }

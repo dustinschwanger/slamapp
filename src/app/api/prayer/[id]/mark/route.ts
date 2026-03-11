@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { getAuthContext } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
@@ -25,48 +26,44 @@ export async function POST(
       );
     }
 
-    // Check if already marked
-    const existing = await db.prayerMarking.findUnique({
-      where: {
-        prayerRequestId_userId: {
-          prayerRequestId: id,
-          userId: auth.userId,
-        },
-      },
+    // Toggle prayer marking atomically: try delete first, then create if nothing was deleted.
+    // This avoids the TOCTOU race condition of check-then-act.
+    const deleted = await db.prayerMarking.deleteMany({
+      where: { prayerRequestId: id, userId: auth.userId },
     });
 
-    if (existing) {
-      // Already marked — toggle off (delete)
-      await db.prayerMarking.delete({
-        where: { id: existing.id },
-      });
+    let marked: boolean;
 
-      const count = await db.prayerMarking.count({
-        where: { prayerRequestId: id },
-      });
-
-      return NextResponse.json({
-        marked: false,
-        prayingCount: count,
-      });
+    if (deleted.count === 0) {
+      // Not currently marked — create a new marking
+      try {
+        await db.prayerMarking.create({
+          data: {
+            prayerRequestId: id,
+            userId: auth.userId,
+          },
+        });
+        marked = true;
+      } catch (e: unknown) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === "P2002"
+        ) {
+          // Race condition: another request already created the marking
+          marked = true;
+        } else {
+          throw e;
+        }
+      }
+    } else {
+      marked = false;
     }
-
-    // Create marking
-    await db.prayerMarking.create({
-      data: {
-        prayerRequestId: id,
-        userId: auth.userId,
-      },
-    });
 
     const count = await db.prayerMarking.count({
       where: { prayerRequestId: id },
     });
 
-    return NextResponse.json({
-      marked: true,
-      prayingCount: count,
-    });
+    return NextResponse.json({ marked, prayingCount: count });
   } catch (error) {
     return handleApiError(error);
   }

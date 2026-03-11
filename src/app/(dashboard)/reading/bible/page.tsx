@@ -3,6 +3,7 @@
 import * as React from "react";
 import { BibleReader } from "@/components/reading/BibleReader";
 import { ScriptureProjection } from "@/components/reading/ScriptureProjection";
+import { ProjectionErrorBoundary } from "@/components/ui/ProjectionErrorBoundary";
 import type { BibleChapter } from "@/lib/bible/types";
 
 export default function BiblePage() {
@@ -17,10 +18,12 @@ export default function BiblePage() {
       />
 
       {projectedChapter && (
-        <ScriptureProjection
-          chapter={projectedChapter}
-          onClose={() => setProjectedChapter(null)}
-        />
+        <ProjectionErrorBoundary onClose={() => setProjectedChapter(null)}>
+          <ScriptureProjection
+            chapter={projectedChapter}
+            onClose={() => setProjectedChapter(null)}
+          />
+        </ProjectionErrorBoundary>
       )}
     </div>
   );

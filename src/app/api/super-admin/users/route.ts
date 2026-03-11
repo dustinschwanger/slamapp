@@ -3,15 +3,15 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
-import type { UserRole } from "@/lib/types";
+import { z } from "zod";
 
-const VALID_ROLES: UserRole[] = [
-  "super_admin",
-  "admin",
-  "leader",
-  "volunteer",
-  "member",
-];
+const createUserSchema = z.object({
+  email: z.string().email("Invalid email address").max(254),
+  firstName: z.string().min(1, "First name is required").max(100),
+  lastName: z.string().min(1, "Last name is required").max(100),
+  role: z.enum(["super_admin", "admin", "leader", "volunteer", "member"]).optional(),
+  churchId: z.string().uuid().nullable().optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,25 +59,20 @@ export async function POST(request: NextRequest) {
     await requireSuperAdmin();
 
     const body = await request.json();
-    const { email, firstName, lastName, role, churchId } = body;
+    const parsed = createUserSchema.safeParse(body);
 
-    if (!email || !firstName || !lastName) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "email, firstName, and lastName are required" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
 
-    const userRole = role || "member";
-    if (!VALID_ROLES.includes(userRole as UserRole)) {
-      return NextResponse.json(
-        { error: `role must be one of: ${VALID_ROLES.join(", ")}` },
-        { status: 400 }
-      );
-    }
+    const data = parsed.data;
+    const userRole = data.role || "member";
 
     // Check if user with that email already exists
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await db.user.findUnique({ where: { email: data.email } });
     if (existing) {
       return NextResponse.json(
         { error: "A user with this email already exists" },
@@ -86,8 +81,8 @@ export async function POST(request: NextRequest) {
     }
 
     // If churchId provided, validate it exists
-    if (churchId) {
-      const church = await db.church.findUnique({ where: { id: churchId } });
+    if (data.churchId) {
+      const church = await db.church.findUnique({ where: { id: data.churchId } });
       if (!church) {
         return NextResponse.json(
           { error: "Church not found" },
@@ -100,11 +95,11 @@ export async function POST(request: NextRequest) {
     const user = await db.user.create({
       data: {
         clerkId: `pending_${randomUUID()}`,
-        email: email.trim().toLowerCase(),
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        email: data.email.trim().toLowerCase(),
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
         role: userRole,
-        churchId: churchId || null,
+        churchId: data.churchId || null,
       },
       select: {
         id: true,

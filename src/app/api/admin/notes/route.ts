@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth/context";
 import { handleApiError } from "@/lib/auth/api-utils";
+import { z } from "zod";
+
+const createNoteSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200),
+  content: z.string().min(1, "Content is required").max(10000),
+  category: z.enum(["planning", "content", "general", "urgent"]).nullable().optional(),
+  isPinned: z.boolean().optional(),
+});
 
 export async function GET() {
   try {
@@ -49,21 +57,23 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, category, isPinned } = body;
+    const parsed = createNoteSchema.safeParse(body);
 
-    if (!title || !content) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Title and content are required" },
+        { error: parsed.error.issues[0]?.message ?? "Validation failed" },
         { status: 400 }
       );
     }
 
+    const data = parsed.data;
+
     const note = await db.adminNote.create({
       data: {
-        title,
-        content,
-        category: category || null,
-        isPinned: isPinned ?? false,
+        title: data.title,
+        content: data.content,
+        category: data.category || null,
+        isPinned: data.isPinned ?? false,
         churchId,
         createdById: auth.userId,
       },

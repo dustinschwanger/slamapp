@@ -145,7 +145,7 @@ export function LessonProjection({
             }}
           >
             {block.content.split("\n\n").map((paragraph, i) => (
-              <p key={i} className={i > 0 ? "mt-6" : ""}>
+              <p key={`${block.type}-p-${i}`} className={i > 0 ? "mt-6" : ""}>
                 {paragraph}
               </p>
             ))}

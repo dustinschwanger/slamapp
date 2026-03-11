@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LessonViewer } from "@/components/reading/LessonViewer";
 import { LessonProjection } from "@/components/reading/LessonProjection";
+import { ProjectionErrorBoundary } from "@/components/ui/ProjectionErrorBoundary";
 import { AddToServiceDialog } from "@/components/services/AddToServiceDialog";
 import { useAddToService } from "@/hooks/useAddToService";
 import { BLOCK_TYPE_LABELS, BLOCK_DURATIONS } from "@/lib/constants/lessons";
@@ -234,11 +235,13 @@ function LessonsContent() {
         />
 
         {projectionState && (
-          <LessonProjection
-            blocks={projectionState.blocks}
-            startIndex={projectionState.startIndex}
-            onClose={() => setProjectionState(null)}
-          />
+          <ProjectionErrorBoundary onClose={() => setProjectionState(null)}>
+            <LessonProjection
+              blocks={projectionState.blocks}
+              startIndex={projectionState.startIndex}
+              onClose={() => setProjectionState(null)}
+            />
+          </ProjectionErrorBoundary>
         )}
 
         <AddToServiceDialog

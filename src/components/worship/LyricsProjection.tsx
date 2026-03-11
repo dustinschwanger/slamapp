@@ -190,9 +190,9 @@ export function LyricsProjection({
           controlsVisible ? "opacity-80" : "opacity-0"
         )}
       >
-        {sorted.map((_, index) => (
+        {sorted.map((section, index) => (
           <button
-            key={index}
+            key={section.displayOrder}
             onClick={(e) => {
               e.stopPropagation();
               setCurrentIndex(index);
