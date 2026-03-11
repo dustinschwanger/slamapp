@@ -48,9 +48,37 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
   const [saving, setSaving] = useState(false);
   const [showAddPanelMobile, setShowAddPanelMobile] = useState(false);
 
-  // Data arrays (to be populated from API in future)
-  const [songs] = useState<Song[]>([]);
-  const [lessons] = useState<LessonWithMeta[]>([]);
+  // Data arrays
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [lessons, setLessons] = useState<LessonWithMeta[]>([]);
+
+  // Fetch songs on mount
+  useEffect(() => {
+    async function fetchSongs() {
+      try {
+        const res = await fetch("/api/songs");
+        if (res.ok) {
+          const data = await res.json();
+          setSongs(data.songs ?? []);
+        }
+      } catch { /* API not available */ }
+    }
+    fetchSongs();
+  }, []);
+
+  // Fetch lesson templates on mount
+  useEffect(() => {
+    async function fetchLessons() {
+      try {
+        const res = await fetch("/api/lessons?tab=templates");
+        if (res.ok) {
+          const data = await res.json();
+          setLessons(data.lessons ?? []);
+        }
+      } catch { /* API not available */ }
+    }
+    fetchLessons();
+  }, []);
 
   // Fetch communities for the dropdown
   useEffect(() => {
@@ -267,7 +295,7 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
             </Button>
             {showAddPanelMobile && (
               <div className="mt-4">
-                <AddItemPanel onAddItem={addItem} songs={songs} lessons={lessons} />
+                <AddItemPanel onAddItem={addItem} songs={songs} lessons={lessons} existingItems={items} />
               </div>
             )}
           </div>
@@ -275,7 +303,7 @@ export function ServicePlanBuilder({ initialPlan }: ServicePlanBuilderProps) {
 
         {/* Right column: Add panel (40%) - hidden on mobile */}
         <div className="hidden lg:block lg:col-span-2 bg-[var(--color-bg-card)] rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[var(--shadow-md)] p-5">
-          <AddItemPanel onAddItem={addItem} songs={songs} lessons={lessons} />
+          <AddItemPanel onAddItem={addItem} songs={songs} lessons={lessons} existingItems={items} />
         </div>
       </div>
 

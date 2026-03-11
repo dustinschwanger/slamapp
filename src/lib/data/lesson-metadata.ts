@@ -406,10 +406,13 @@ export const lessonMetadata: LessonMeta[] = [
   },
 ];
 
-/** Get all unique book names from the metadata registry */
+/** Canonical book order for the dropdown (Matthew before John, etc.) */
+const BOOK_ORDER = ["Matthew", "John"];
+
+/** Get all unique book names from the metadata registry, in canonical order */
 export function getAvailableBooks(): string[] {
-  const books = new Set(lessonMetadata.map((m) => m.book));
-  return Array.from(books);
+  const available = new Set(lessonMetadata.map((m) => m.book));
+  return BOOK_ORDER.filter((b) => available.has(b));
 }
 
 /** Get metadata for a specific book */

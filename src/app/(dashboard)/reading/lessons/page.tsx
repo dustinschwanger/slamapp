@@ -358,7 +358,7 @@ function LessonsContent() {
                       : "text-text-primary hover:bg-[var(--color-bg-secondary)]"
                   )}
                 >
-                  Gospel of {book}
+                  {book}
                 </button>
               ))}
             </div>
